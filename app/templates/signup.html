@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% block head %}
+{% endblock %}
+
+{% block content %}
+
+
+    <form class="form-signup">
+        <div class="row">
+            <div class="col">
+                <label for="input-name" class="form-label">Nome Completo</label>
+                <input  type="text" name="name" id="input-name" class="form-control">
+            </div>
+            <div class="col">
+                <label for="input-email" class="form-label">E-mail</label>
+                <input type="text" name="email" id="input-email" class="form-control">
+            </div>
+            <div class="col">
+                <label for="input-cpf" class="form-label">CPF</label>
+                <input type="text" name="cpf" id="input-cpf" class="form-control">
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                <label for="input-password" class="form-label">Senha</label>
+                <input type="password" name="password" id="input-password" class="form-control">
+            </div>
+            <div class="col">
+                <label for="input-repeatPassword" class="form-label">Repita sua senha</label>
+                <input type="password" name="repeatPassword" id="input-repeatPassword" class="form-control">
+            </div>
+        </div>
+        <div class="row mt-4">
+            <button type="submit" id="btn-submit" class="btn btn-dark ">Registrar</button>
+        </div>
+    </form>
+
+{% endblock %}
+
+{% block script %}
+
+    <script src="{{ url_for('static', filename='js/validate.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/signup.js') }}"></script>
+{% endblock %}

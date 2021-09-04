@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+
+{% block head %}
+{% endblock %}
+
+{% block content %}
+
+
+    <form class="form-signin">
+        <div class="row">
+            <div class="col">
+                <label for="input-cpf" class="form-label">CPF</label>
+                <input placeholder="***.***.***-**" type="text" name="cpf" id="input-cpf" class="form-control">
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                <label for="input-password" class="form-label">Senha</label>
+                <input type="password" name="password" id="input-password" class="form-control">
+            </div>
+        </div>
+        <div class="row">
+            <button class="btn btn-dark ">Entrar</button>
+        </div>
+    </form>
+
+{% endblock %}
+
+{% block script %}
+    <script src="{{ url_for('static', filename='js/validate.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/signin.js') }}"></script>
+{% endblock %}
