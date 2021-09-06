@@ -1,6 +1,7 @@
 from app import app
 from flask_login import login_user
 from flask import Blueprint, render_template
+from app.models.Forms import SignupForm
 
 auth = Blueprint('user', __name__) 
 
@@ -21,7 +22,12 @@ def signin():
 
 @auth.route('/signup', methods=['GET', 'POST'])
 def signup():
-    return render_template('signup.html')
+    form = SignupForm()
+
+    if form.validate_on_submit():
+        print(form.name.data)
+
+    return render_template('signup.html', form_signup=form )
 
 @auth.route('/logout')
 def logout():
