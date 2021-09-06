@@ -6,27 +6,38 @@
 {% block content %}
 
 
-    <form class="form-signin">
-        <div class="row">
-            <div class="col">
-                <label for="input-cpf" class="form-label">CPF</label>
-                <input placeholder="***.***.***-**" type="text" name="cpf" id="input-cpf" class="form-control">
-            </div>
-        </div>
-        <div class="row">
-            <div class="col">
-                <label for="input-password" class="form-label">Senha</label>
-                <input type="password" name="password" id="input-password" class="form-control">
-            </div>
-        </div>
-        <div class="row">
-            <button class="btn btn-dark ">Entrar</button>
-        </div>
-    </form>
+
+<form action="" , method="POST">
+    {{ form_signin.csrf_token }}
+    <div class="form-group">
+        <label class="form-label" for="">CPF</label>
+        {{ form_signin.cpf(class='form-control') }}
+        {% for err in form_signin.errors.cpf %}
+            <span class="text-danger">{{err}}</span>
+        {% endfor %}
+    </div>
+
+    <div class="form-group">
+        <label class="form-label" for="">Senha</label>
+        {{ form_signin.password(class='form-control') }}
+        {% for err in form_signin.errors.password %}
+            <span class="text-danger">{{err}}</span>
+        {% endfor %}
+    </div>
+
+    <div class="form-group">
+        {{ form_signin.remember_me() }}
+        <label class="form-label">Permanecer logado</label>
+
+
+    </div>
+
+    <button type="submit" class="mt-3 btn btn-dark">Enviar</button>
+
+</form>
+
 
 {% endblock %}
 
 {% block script %}
-    <script src="{{ url_for('static', filename='js/validate.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/signin.js') }}"></script>
 {% endblock %}

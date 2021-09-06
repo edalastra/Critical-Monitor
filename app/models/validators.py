@@ -1,6 +1,14 @@
 from wtforms import ValidationError
+from app.models.User import User
 
-
+def unique_email(form, field):
+    user = User.query.filter_by(email=field.data).first()
+    if user:
+        raise ValidationError("Esse e-mail já é cadastrado")
+def unique_cpf(form, field):
+    user = User.query.filter_by(cpf=field.data).first()
+    if user:
+        raise ValidationError("Esse CPF já é cadastrado")
 
 def validate_cpf(form, field):
     try:
