@@ -12,9 +12,9 @@ def signin():
     form = SigninForm()
     if form.validate_on_submit():
         user = User.query.filter_by(cpf=form.cpf.data).first()
-        if user and user.password == form.password.data:
+        if user and user.verify_password(form.password.data):
             login_user(user, remember=form.remember_me.data)
-            return redirect(url_for("/index"))
+            return redirect(url_for("/home"))
 
         flash("CPF ou senha incorretos.")
     return render_template('signin.html', form_signin=form)
@@ -24,11 +24,12 @@ def signup():
     form = SignupForm()
 
     if form.validate_on_submit():
-        firstname = ''.join(form.name.data.split(' ')[:-1])
-        lastname = form.name.data.split(' ')[-1]
-        user = User(firstname, lastname, form.email.data, form.cpf.data, form.password.data)
+        
+        user = User(form.name.data, form.email.data, form.cpf.data, form.password.data)
         db.session.add(user)
         db.session.commit()
+
+        redirect("user.signin")
 
     return render_template('signup.html', form_signup=form)
 

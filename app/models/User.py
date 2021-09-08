@@ -1,20 +1,23 @@
 from app import login_manager, db
+import bcrypt   
 
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    first_name = db.Column(db.String, nullable=True)
-    last_name = db.Column(db.String, nullable=True)
+    name = db.Column(db.String, nullable=True)
     email = db.Column(db.String, nullable=True, unique=True )
     cpf = db.Column(db.String, nullable=True, unique=True)
     password = db.Column(db.String, nullable=True)
 
 
-    def __init__(self, first_name, last_name, email, cpf, password):
-        self.first_name = first_name
-        self.last_name = last_name
+    def __init__(self, name, email, cpf, password):
+        self.name = name
         self.email = email
         self.cpf = cpf
-        self.password = password
+        hash = bcrypt.hashpw(str(password).encode('utf-8'), bcrypt.gensalt())
+        self.password = hash.decode('utf-8')
+
+    def verify_password(self, password):
+        return bcrypt.checkpw(password.encode('utf-8'), self.password.encode('utf-8'))
     
     @property
     def is_authenticated(self):
