@@ -21,5 +21,7 @@ from app.models import User
 
 from app.controllers.auth import auth as auth_blueprint
 app.register_blueprint(auth_blueprint)
-from app.controllers.cm import cm as cm_blueprint
-app.register_blueprint(cm_blueprint)
+from app.controllers.monitor import monitor as monitor_blueprint
+monitor_blueprint.register_blueprint(auth_blueprint)
+app.register_blueprint(monitor_blueprint)
+
