@@ -7,3 +7,7 @@ Flask-Migrate
 Flask-WTF
 email_validator
 bcrypt
+opencv-python
+tensorflow
+imutils
+pyyaml

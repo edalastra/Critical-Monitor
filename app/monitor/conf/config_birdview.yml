@@ -1,0 +1,17 @@
+image_parameters:
+  height_og: 800
+  img_path: app/monitor/img/static_frame_from_video.jpg
+  p1:
+  - 702
+  - 535
+  p2:
+  - 726
+  - 142
+  p3:
+  - 198
+  - 466
+  p4:
+  - 239
+  - 128
+  size_frame: '800'
+  width_og: 600

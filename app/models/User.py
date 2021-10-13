@@ -7,7 +7,7 @@ class User(db.Model):
     email = db.Column(db.String, nullable=True, unique=True )
     cpf = db.Column(db.String, nullable=True, unique=True)
     password = db.Column(db.String, nullable=True)
-
+    config = db.relationship('Config', backref='user', lazy=True)
 
     def __init__(self, name, email, cpf, password):
         self.name = name
@@ -19,6 +19,12 @@ class User(db.Model):
     def verify_password(self, password):
         return bcrypt.checkpw(password.encode('utf-8'), self.password.encode('utf-8'))
     
+    @property
+    def has_config(self):
+        stmt = self.query.join(User.config)
+        result = db.session.execute(stmt)
+        return result.fetchone()
+
     @property
     def is_authenticated(self):
         return True

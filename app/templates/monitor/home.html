@@ -1,3 +1,14 @@
 {% extends 'base.html' %}
 
-    {% include 'monitor/sidebar.html' %}
+{% block content %}
+
+    <div class="row">
+        <div class="col">
+            {% if current_user.has_config %}
+               <p>aaaa{{ current_user.name }}</p>
+            {% endif %}
+            <!-- <img src="<img src="{{ url_for('monitor.video_feed') }}" width="50%">e -->
+            <!-- <img src="{{ url_for('monitor.video_feed') }}" width="50%"> -->
+        </div>
+    </div>
+{% endblock %}

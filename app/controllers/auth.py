@@ -15,7 +15,6 @@ def signin():
         if user and user.verify_password(form.password.data):
             login_user(user, remember=form.remember_me.data)
             return redirect(url_for("monitor.home"))
-
         flash("CPF ou senha incorretos.")
     return render_template('auth/signin.html', form_signin=form)
 

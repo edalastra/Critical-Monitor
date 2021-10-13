@@ -16,7 +16,7 @@ login_manager = LoginManager(app)
 
 
 
-from app.models import User
+from app.models import User, Config
 
 
 from app.controllers.auth import auth as auth_blueprint

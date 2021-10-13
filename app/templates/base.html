@@ -10,11 +10,10 @@
     {% block head %} {% endblock %}
   </head>
 <body>
+      {% import 'monitor/sidebar.html' as nav %} 
 
-    {% block sidebar %}{% endblock %}
-
+      {{ nav.sidebar() }}
       <main>
-
         <div class="container">
           {% with messages = get_flashed_messages() %}
         {% if messages %}
@@ -26,12 +25,11 @@
             </ul>
              </div>
 
-         {% endif %}
-    {% endwith %}
+          {% endif %}
+          {% endwith %}
           {% block content %} {% endblock %}
         </div>
       </main>
-
       <script src="{{ url_for('static', filename='js/jquery.js') }}"></script>
 
       {% block script %} 
