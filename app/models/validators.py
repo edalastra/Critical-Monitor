@@ -15,7 +15,6 @@ def validate_cpf(form, field):
         cpf = Cpf(field.data)
     except ValueError:
         raise ValidationError("CPF inválido!")
-            
 
 class Cpf:
     def __init__(self, documento):

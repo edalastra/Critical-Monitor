@@ -1,21 +1,219 @@
 {% extends 'base.html' %}
-
 {% block content %}
-<form action="" , method="POST">
-    {{ form.csrf_token }}
-    <div class="form-group">
-        <label class="form-label" for="">Distância mínima entra pessoas</label>
-        {{ form.minimum_distance(class='form-control') }}
-        {% for err in form.errors.minimum_distance %}
-            <span class="text-danger">{{err}}</span>
-        {% endfor %}
+
+
+<div class="modal fade " id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog modal-fullscreen">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="staticBackdropLabel">Calibragem de câmera</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+
+            <form>
+                <div class="form-group">
+                    <label class="form-label" for="">Nome da sala</label>
+                    <input type="text" class="form-control" id="room-name" placeholder="Exemplo: Sala 504">
+                    <span id="camera-error" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="">IP ou porta da câmera a ser utilizada</label>
+                    <input type="text" class="form-control" id="portCamera" placeholder="Pora ou endereço IP">
+                    <span id="camera-error" class="text-danger"></span>
+                </div>
+            
+                <div class="form-group mt-4">
+                    <button id="verifyCamera" class="btn btn-dark">
+                        <span style="display: none;" id="btn-spinner" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                        Calibrar câmera
+                    </button>
+            
+                </div>
+            </form>
+
+            <p>Clique em quatro pontos que corresponde a área de monitoramento.</p>
+            <div id="mainContent">
+                <div id="canvasDiv">
+                    <br/>
+                    <button id="generate" type="button">Generate
+                    </button> 
+                </div>
+                <h1>Result:</h1>
+                <div class="clipParent" style="float:left;"> 
+                </div> 
+            </div>
+            <img id="frame">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button id="btn-send-points" type="button" class="btn btn-primary">Enviar</button>
+        </div>
+      </div>
     </div>
-    <div class="form-group">
-        <label class="form-label" for="">IP ou porta da câmera a ser utilizada</label>
-        {{ form.camera_address(class='form-control') }}
-        {% for err in form.errors.camera_address %}
-            <span class="text-danger">{{err}}</span>
-        {% endfor %}
-    </div>
-</form>
+  </div>
+
+  <div class="list-group">
+    {% for config in configs %}
+        <a href="#" class="list-group-item list-group-item-action">{{ config.room_name }}</a>
+    {% endfor %}
+  </div>
+
+  <div class="row mt-4">
+      <div class="col">
+          <button id="new-room" class="btn btn-primary">
+              Criar nova sala
+          </button>
+      </div>
+  </div>
+
+
+
+
+
+{% endblock %}
+{% block script %} 
+<script src="{{ url_for('static', filename='js/polyClip.js') }}"></script>
+<script>
+    const points = []
+    const verifyCamera = $('#verifyCamera');
+    const portCamera = $('#portCamera');
+    const image = {src: "", w: "",h: ""}
+    const btnSendPoints = $("#btn-send-points");
+
+$("#new-room").click(() => {
+    const modal = new bootstrap.Modal(document.getElementById('staticBackdrop'), {
+            keyboard: false
+        });
+    modal.show();
+});
+
+
+btnSendPoints.click(async () => {
+    const roomName = $('#room-name').val();
+    const response = await fetch("{{ url_for('monitor.register_config') }}", {
+        method: 'POST',
+        headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({room_name: roomName, points: points, size: image.w,  camera_address: portCamera.val()})
+    });
+    if(response.status == 200) {
+        window.location.replace("/home")
+    }
+})
+
+verifyCamera.click(async e => {
+    e.preventDefault();
+    $("#btn-spinner").toggle()
+    const response = await fetch("{{ url_for('monitor.access_camera') }}", {
+        method: 'POST',
+        headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({address: portCamera.val()})
+    });
+    const { frame, w, h } = await response.json()
+    image.src = "data:image/jpeg;base64," + frame 
+    image.w = w
+    image.h = h
+
+    $("#btn-spinner").attr('hidden','true')
+    if(response.status == 200) {
+
+        polySelection()
+    } else {
+        $('#cameraError').text("Câmera inválida")
+    }
+});
+
+
+// PolyClip
+function polySelection() {
+
+    const canvasDiv = document.getElementById('canvasDiv'); 
+    canvas = document.createElement('canvas'); 
+    canvas.setAttribute('width', image.w); 
+    canvas.setAttribute('height', image.h); 
+    canvas.setAttribute('id', 'canvas'); 
+    $(canvasDiv).prepend(canvas); 
+    if(typeof G_vmlCanvasManager != 'undefined') { 
+        canvas = G_vmlCanvasManager.initElement(canvas); 
+    } 
+
+    const context = canvas.getContext('2d'); 
+    const imageObj = new Image(); 
+    imageObj.src = image.src
+
+    imageObj.onload = function() {
+        $(canvas).attr({width : this.width, height: this.height});
+        context.drawImage(imageObj,0,0); 
+    }; 
+
+    $('#generate').click(function(){ 
+       
+        for(let i=0; i < clickX.length; i++){ 
+            points.push([clickX[i], clickY[i]]); 
+        }
+
+        context.lineWidth = 10;
+        context.strokeStyle = 'red';
+        context.lineWidth = 5;
+
+        // draw a red line
+        context.beginPath();
+        context.moveTo(...points[0]);
+        context.lineTo(...points[1]);
+        context.lineTo(...points[2]);
+        context.lineTo(...points[3]);
+        context.lineTo(...points[0]);
+
+        context.stroke();
+    });
+
+function redraw(){ 
+        canvas.width = canvas.width; // Clears the canvas 
+        context.drawImage(imageObj,0,0); 
+
+        context.strokeStyle = "#df4b26"; 
+        context.lineJoin = "round"; 
+        context.lineWidth = 5; 
+
+        for(var i=0; i < clickX.length; i++) 
+        { 
+        context.beginPath(); 
+        context.arc(clickX[i], clickY[i], 3, 0, 2 * Math.PI, false); 
+        context.fillStyle = '#ffffff'; 
+        context.fill(); 
+        context.lineWidth = 5; 
+        context.stroke(); 
+        } 
+    } 
+   
+    let clickX = new Array(); 
+    let clickY = new Array(); 
+    let clickDrag = new Array(); 
+    let paint; 
+
+    function addClick(x, y, dragging) 
+    { 
+        clickX.push(x); 
+        clickY.push(y); 
+        clickDrag.push(dragging); 
+    } 
+
+$('#canvas').click(function(e){ 
+    let mouseX = e.pageX - this.offsetLeft; 
+    let mouseY = e.pageY - this.offsetTop; 
+
+    addClick(e.pageX - this.offsetLeft, e.pageY - this.offsetTop); 
+    redraw(); 
+}); 
+
+}
+
+</script>
+
 {% endblock %}

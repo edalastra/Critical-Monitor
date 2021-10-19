@@ -15,7 +15,3 @@ class SignupForm(FlaskForm):
     password = PasswordField("password", [DataRequired()])
     repeat_password = PasswordField("repeat_password", 
         [DataRequired(), EqualTo('password', message='As senhas não são iguais')])
-
-class ConfigForm(FlaskForm):
-    minimum_distance = IntegerField("minimum_distance", [DataRequired()])
-    camera_address = StringField("camera_address", [DataRequired()])
