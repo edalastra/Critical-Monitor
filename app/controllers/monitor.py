@@ -43,6 +43,8 @@ def register_config():
     try:
         content = request.json
         points = content['points']
+        print(points)
+
         camera_address = content['camera_address']
         room_name =content['room_name']
         config = Config(room_name, current_user.get_id(), 2, camera_address, points)
@@ -53,6 +55,7 @@ def register_config():
             "status": "Bad ok",
             }), 200)
     except Exception as e:
+        print(e.get_message())
         return make_response(jsonify({
         "status": "Bad Request",
         }), 400)
@@ -84,12 +87,13 @@ def access_camera():
             "h": h,
             "w": w
         }), 200)
-    response.set_cookie("camera_address", content['address'])
     return response
    
 
 
 @monitor.route('/video_feed')
 def video_feed():
-    camera_address = request.cookies.get('camera_address')
+    config_id = request.cookies.get('camera_address')
+    config = Config.query.filter(Config.id == int(config_id)).first()
+    camera_address = config.camera_address
     return Response(gen_frames(int(camera_address)), mimetype='multipart/x-mixed-replace; boundary=frame')

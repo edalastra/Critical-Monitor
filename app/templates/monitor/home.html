@@ -4,15 +4,31 @@
 
     <div class="row">
         <div class="col">
-            <select class="form-select" aria-label="Default select example">
+            <select id="select-config" class="form-select" aria-label="Default select example">
+                <option selected disabled>Seleciona uma sala</option>
 
                 {% for config in configs %}
-                    <option>{{ config.room_name }}</option>
+                    <option config-id="{{ config.id }}" >{{ config.room_name }}</option>
                 {% endfor %}
             </select>
-
-            <!-- <img src="<img src="{{ url_for('monitor.video_feed') }}" width="50%">e -->
-            <!-- <img src="{{ url_for('monitor.video_feed') }}" width="50%"> -->
+        </div>
+        <div class="col">
+            <img id="video-feed" src="">
         </div>
     </div>
+{% endblock %}
+
+{% block script %}
+<script>
+    const selectConfig = $('#select-config');
+
+    selectConfig.change(async () => {
+        const configId = selectConfig.find(":selected").attr('config-id');
+        
+        document.cookie = "camera_address=" + configId;
+        
+        $("#video-feed").attr("src", "{{ url_for('monitor.video_feed') }}");
+    });
+
+</script>
 {% endblock %}
