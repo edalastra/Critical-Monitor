@@ -11,6 +11,16 @@
                     <option config-id="{{ config.id }}" >{{ config.room_name }}</option>
                 {% endfor %}
             </select>
+            <div class="row">
+                <div class="col">
+                    <div class="card">
+                        <div class="card-body">
+                          Número atual de pessoas na sala: <span class="badge bg-secondary" id="peoples"></span>
+                        </div>
+                      </div>
+                </div>
+            </div>
+
         </div>
         <div class="col">
             <img id="video-feed" src="">
@@ -19,9 +29,15 @@
 {% endblock %}
 
 {% block script %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js" integrity="sha512-q/dWJ3kcmjBLU4Qc47E4A9kTB4m3wuTY7vkFJDTZKjTs8jhyGQnaUrxa0Ytd0ssMZhbNua9hE+E7Qv1j+DyZwA==" crossorigin="anonymous"></script>
+
 <script>
     const selectConfig = $('#select-config');
-
+    const numPeoples = $('#peoples');
+    const socket = io();
+    socket.on('update_status', function(message) {
+        numPeoples.text(message.num_peoples);
+    });
     selectConfig.change(async () => {
         const configId = selectConfig.find(":selected").attr('config-id');
         

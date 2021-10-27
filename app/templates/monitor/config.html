@@ -97,7 +97,7 @@ btnSendPoints.click(async () => {
         'Accept': 'application/json',
         'Content-Type': 'application/json'
         },
-        body: JSON.stringify({room_name: roomName, points: points, size: image.w,  camera_address: portCamera.val()})
+        body: JSON.stringify({room_name: roomName, points: points, width: image.w, height: image.h, camera_address: portCamera.val()})
     });
     if(response.status == 200) {
         window.location.replace("/home")

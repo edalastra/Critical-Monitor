@@ -10,9 +10,7 @@
     {% block head %} {% endblock %}
   </head>
 <body>
-      {% import 'monitor/sidebar.html' as nav %} 
-
-      {{ nav.sidebar() }}
+     
       <main>
         <div class="container">
           {% with messages = get_flashed_messages() %}

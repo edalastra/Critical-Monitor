@@ -14,14 +14,14 @@ class Config(db.Model):
     point_y3 = db.Column(db.Integer)
     point_x4 = db.Column(db.Integer)
     point_y4 = db.Column(db.Integer)
+    width_og= db.Column(db.Integer)
+    height_og = db.Column(db.Integer)
 
-
-    def __init__(self, room_name, user_id, minimum_distance, camera_address, points):
+    def __init__(self, room_name, user_id, minimum_distance, camera_address, points, width_og, height_og):
         self.room_name = room_name
         self.user_id = user_id
         self.minimum_distance = minimum_distance
         self.camera_address = camera_address
-
         self.point_x1 = points[0][0]
         self.point_y1 = points[0][1]
         self.point_x2 = points[1][0]
@@ -30,3 +30,5 @@ class Config(db.Model):
         self.point_y3 = points[2][1]
         self.point_x4 = points[3][0]
         self.point_y4 = points[3][1]
+        self.width_og = width_og
+        self.height_og = height_og

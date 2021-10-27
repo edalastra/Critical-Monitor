@@ -28,7 +28,6 @@ def compute_point_perspective_transformation(matrix,list_downoids):
 	transformed_points = cv2.perspectiveTransform(list_points_to_detect, matrix)
 	# Loop over the points and add them to the list that will be returned
 	transformed_points_list = list()
-	print(transformed_points_list)
 	for i in range(0,transformed_points.shape[0]):
 		transformed_points_list.append([transformed_points[i][0][0],transformed_points[i][0][1]])
 	return transformed_points_list

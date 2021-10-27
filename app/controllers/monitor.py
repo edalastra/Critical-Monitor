@@ -3,7 +3,7 @@ from app import db
 from flask_login import current_user
 from app.models.Config import Config
 from app.models.User import User
-
+from app.models.Inference import Inference
 import cv2
 import base64
 # from app.monitor.src.social_distanciation_video_detection import gen_frames
@@ -22,32 +22,14 @@ def config():
     configs = Config.query.join(User.config).filter(User.id == current_user.id).all()
     return render_template('monitor/config.html', configs=configs)
 
-
-
-def gen_frames(idx):
-    cap = cv2.VideoCapture(idx)
-
-    while True:	
-        (frame_exists, frame) = cap.read()
-        # Test if it has reached the end of the video
-        if not frame_exists:
-            break
-        else:
-            ret, buffer = cv2.imencode('.jpg', frame)
-            bframe = buffer.tobytes()
-            yield (b'--frame\r\n'b'Content-Type: image/jpeg\r\n\r\n' + bframe + b'\r\n')  # concat frame one by one and show result
-
-
 @monitor.route('/register_config', methods=['POST'])
 def register_config():
     try:
         content = request.json
         points = content['points']
-        print(points)
-
         camera_address = content['camera_address']
         room_name =content['room_name']
-        config = Config(room_name, current_user.get_id(), 2, camera_address, points)
+        config = Config(room_name, current_user.get_id(), 2, camera_address, points, content['width'], content['height'])
         db.session.add(config)
         db.session.commit()
 
@@ -55,13 +37,10 @@ def register_config():
             "status": "Bad ok",
             }), 200)
     except Exception as e:
-        print(e.get_message())
         return make_response(jsonify({
         "status": "Bad Request",
+        "description": e
         }), 400)
-
-
-    
 
 @monitor.route('/access_camera', methods=['POST'])
 def access_camera():
@@ -95,5 +74,11 @@ def access_camera():
 def video_feed():
     config_id = request.cookies.get('camera_address')
     config = Config.query.filter(Config.id == int(config_id)).first()
-    camera_address = config.camera_address
-    return Response(gen_frames(int(camera_address)), mimetype='multipart/x-mixed-replace; boundary=frame')
+    points = []
+    points.append([config.point_x1, config.point_y1])
+    points.append([config.point_x2, config.point_y2])
+    points.append([config.point_x3, config.point_y3])
+    points.append([config.point_x4, config.point_y4])
+
+    inference = Inference(config.width_og, config.height_og, config.height_og, points)
+    return Response(inference.init(), mimetype='multipart/x-mixed-replace; boundary=frame')
