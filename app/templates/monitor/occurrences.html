@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% from "components/charts.html" import line %}
+{% block content %}
+    <div class="row">
+        <div class="col">
+            {{ line(occurrences_json) }}
+        </div>
+        <div style="height: 800px; overflow-y: scroll;" class="col">
+            <table class="table table-hover">
+                <thead>
+                    <th scope="col">Hora</th>
+                    <th scope="col">Tipo</th>
+                </thead>
+                <tbody >
+                    {% for occ in occurrences %}
+                    <tr>
+                        <th scope="row">{{ occ.timestamp.strftime("%H:%M:%S") }}</th>
+                        <td>{{ occ.occurrence_type }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+                    
+            </table>
+        </div>
+    </div>
+    
+{% endblock %}
+
+{% block script %}
+
+<script src="{{ url_for('static', filename='js/charts.js') }}"></script>
+
+
+{% endblock %}

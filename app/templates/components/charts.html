@@ -1,0 +1,55 @@
+{% macro line(data) %}
+
+<canvas width="200" id="capacity-chart"></canvas>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.6.0/dist/chart.min.js"></script>
+<script>
+    const ctx = document.getElementById('capacity-chart').getContext('2d');
+    let occurrences_list = '{{ data | tojson }}'
+    occurrences_list = JSON.parse(occurrences_list.substring(1 , occurrences_list.length -1))
+    const {x, y} = occurrences_list
+
+    const chart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: x,
+            datasets: [{
+                data: y,
+                label: "Ocorrências X 30 min",
+                borderColor: "#3e95cd",
+                fill: false
+            },
+            ]
+        },
+        options: {
+            scales: {
+                xAxes: [{
+                    type: 'time',
+                    distribution: 'linear',
+                }],
+                title: {
+                    display: false,
+                }
+            }
+        }
+    });
+
+    function updateChart(occurrence) {
+        //console.log(chart.data.datasets);
+        const date = new Date(occurrence)
+
+        chart.data.labels.at(-1) < date && chart.data.labels.push(date)
+        chart.data.datasets[0].data.push(occurrence.capacity);
+
+        console.log(chart.data.datasets[0].data);
+        chart.update();
+    }
+
+    socket.on('update_occurrences', data => {
+        const { occurrences } = data;
+        current_occurrences.push(occurrences);
+        localStorage.setItem('occurrences', current_occurrences);
+        updateChart(occurrences);
+    });
+</script>
+{% endmacro %}

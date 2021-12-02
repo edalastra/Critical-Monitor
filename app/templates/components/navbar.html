@@ -1,0 +1,26 @@
+{% macro navbar(user) %}
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark justify-content-between">
+  <a class="navbar-brand" href="/">Critical Monitor</a>
+  {% if user.is_authenticated %}
+  <div class="collapse navbar-collapse" id="navbarSupportedContent">
+    <ul class="navbar-nav mr-auto">
+      <li class="nav-item active">
+        <a class="nav-link" href="{{ url_for('monitor.home') }}">Home <span class="sr-only">(current)</span></a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="{{ url_for('monitor.config') }}">Salas</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="{{ url_for('monitor.occurrences') }}">Ocorrências</a>
+      </li>
+    </ul>
+  </div>
+  <span class="navbar-text">
+    <a class="nav-link disabled" href="#">{{ user.name }}</a>
+  </span>
+  <a class="btn btn-outline-secondary mr-4" href="{{ url_for('monitor.auth.logout') }}">Sair</a>
+  {% else %}
+  <a class="btn btn-outline-secondary " href="{{ url_for('monitor.auth.signin') }}">Entrar</a>
+  {% endif %}
+</nav>
+{% endmacro %}

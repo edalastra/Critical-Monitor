@@ -1,4 +1,5 @@
 from app import db
+from app.models.Occurrence import Occurrence
 
 class Config(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -6,6 +7,7 @@ class Config(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     minimum_distance = db.Column(db.Integer, nullable=False)
     camera_address = db.Column(db.String, nullable=False)
+    capacity = db.Column(db.Integer, nullable=False)
     point_x1 = db.Column(db.Integer)
     point_y1 = db.Column(db.Integer)
     point_x2 = db.Column(db.Integer)
@@ -14,10 +16,12 @@ class Config(db.Model):
     point_y3 = db.Column(db.Integer)
     point_x4 = db.Column(db.Integer)
     point_y4 = db.Column(db.Integer)
+    size_frame = db.Column(db.Integer)
     width_og= db.Column(db.Integer)
     height_og = db.Column(db.Integer)
+    occurrences = db.relationship('Occurrence', backref='config', lazy=True, passive_deletes=True)
 
-    def __init__(self, room_name, user_id, minimum_distance, camera_address, points, width_og, height_og):
+    def __init__(self, room_name, user_id, minimum_distance, camera_address, points, width_og, height_og, size_frame, capacity):
         self.room_name = room_name
         self.user_id = user_id
         self.minimum_distance = minimum_distance
@@ -32,3 +36,5 @@ class Config(db.Model):
         self.point_y4 = points[3][1]
         self.width_og = width_og
         self.height_og = height_og
+        self.size_frame = size_frame
+        self.capacity = capacity

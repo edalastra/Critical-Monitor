@@ -11,85 +11,10 @@ import yaml
 import cv2
 import os
 
-COLOR_RED = (0, 0, 255)
-COLOR_GREEN = (0, 255, 0)
-COLOR_BLUE = (255, 0, 0)
-BIG_CIRCLE = 60
-SMALL_CIRCLE = 3
 
 
-def get_human_box_detection(boxes,scores,classes,height,width):
-	""" 
-	For each object detected, check if it is a human and if the confidence >> our threshold.
-	Return 2 coordonates necessary to build the box.
-	@ boxes : all our boxes coordinates
-	@ scores : confidence score on how good the prediction is -> between 0 & 1
-	@ classes : the class of the detected object ( 1 for human )
-	@ height : of the image -> to get the real pixel value
-	@ width : of the image -> to get the real pixel value
-	"""
-	array_boxes = list() # Create an empty list
-	for i in range(len(scores)):
-		# If the class of the detected object is 1 and the confidence of the prediction is > 0.6
-		if int(int(classes[i])) == 0 and scores[i] > 0.6:
-			# Multiply the X coordonnate by the height of the image and the Y coordonate by the width
-			# To transform the box value into pixel coordonate values.
-			#box = [boxes[0,i,0],boxes[0,i,1],boxes[0,i,2],boxes[0,i,3]] * np.array([height, width, height, width])
-			# Add the results converted to int
-			ymin = int(max(1,(boxes[i][0] * height)))
-			xmin = int(max(1,(boxes[i][1] * width)))
-			ymax = int(min(height,(boxes[i][2] * height)))
-			xmax = int(min(width,(boxes[i][3] * width)))
-			array_boxes.append((int(ymin),int(xmin),int(ymax),int(xmax)))
-			print(array_boxes)
-	return array_boxes
 
 
-def get_centroids_and_groundpoints(array_boxes_detected):
-	"""
-	For every bounding box, compute the centroid and the point located on the bottom center of the box
-	@ array_boxes_detected : list containing all our bounding boxes 
-	"""
-	array_centroids,array_groundpoints = [],[] # Initialize empty centroid and ground point lists 
-	for index,box in enumerate(array_boxes_detected):
-		# Draw the bounding box 
-		# c
-		# Get the both important points
-		centroid,ground_point = get_points_from_box(box)
-		array_centroids.append(centroid)
-		array_groundpoints.append(centroid)
-	return array_centroids,array_groundpoints
-
-
-def get_points_from_box(box):
-	"""
-	Get the center of the bounding and the point "on the ground"
-	@ param = box : 2 points representing the bounding box
-	@ return = centroid (x1,y1) and ground point (x2,y2)
-	"""
-	# Center of the box x = (x1+x2)/2 et y = (y1+y2)/2
-	center_x = int(((box[1]+box[3])/2))
-	center_y = int(((box[0]+box[2])/2))
-	# Coordiniate on the point at the bottom center of the box
-	center_y_ground = center_y + ((box[2] - box[0])/2)
-	return (center_x,center_y),(center_x,int(center_y_ground))
-
-
-def change_color_on_topview(pair):
-	"""
-	Draw red circles for the designated pair of points 
-	"""
-	cv2.circle(bird_view_img, (pair[0][0],pair[0][1]), BIG_CIRCLE, COLOR_RED, 2)
-	cv2.circle(bird_view_img, (pair[0][0],pair[0][1]), SMALL_CIRCLE, COLOR_RED, -1)
-	cv2.circle(bird_view_img, (pair[1][0],pair[1][1]), BIG_CIRCLE, COLOR_RED, 2)
-	cv2.circle(bird_view_img, (pair[1][0],pair[1][1]), SMALL_CIRCLE, COLOR_RED, -1)
-
-def draw_rectangle(corner_points):
-	# Draw rectangle box over the delimitation area
-	cv2.line(frame, (corner_points[0][0], corner_points[0][1]), (corner_points[1][0], corner_points[1][1]), COLOR_BLUE, thickness=1)
-	cv2.line(frame, (corner_points[1][0], corner_points[1][1]), (corner_points[3][0], corner_points[3][1]), COLOR_BLUE, thickness=1)
-	cv2.line(frame, (corner_points[0][0], corner_points[0][1]), (corner_points[2][0], corner_points[2][1]), COLOR_BLUE, thickness=1)
-	cv2.line(frame, (corner_points[3][0], corner_points[3][1]), (corner_points[2][0], corner_points[2][1]), COLOR_BLUE, thickness=1)
 
 
 ######################################### 
@@ -231,7 +156,7 @@ def draw_rectangle(corner_points):
 # 			yield (b'--frame\r\n'
 #                    b'Content-Type: image/jpeg\r\n\r\n' + bframe + b'\r\n')  # concat frame one by one and show result
 		# Draw the green rectangle to delimitate the detection zone
-		# draw_rectangle(corner_points)
+		#draw_rectangle(corner_points) 
 		# # Show both images	
 		# cv2.imshow("Bird view", bird_view_img)
 		# cv2.imshow("Original picture", frame)

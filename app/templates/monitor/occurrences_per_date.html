@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <form > <!-- note action -->
+        <select name='config' id="select-config" class="form-select" aria-label="Default select example">
+            <option selected disabled>Seleciona uma sala</option>
+            {% for config in configs %}
+                <option value="{{ config.id }}" >{{ config.room_name }}</option>
+            {% endfor %}
+        </select>
+    </form>
+    <table class="table table-hover">
+        <thead>
+            <th scope="col">Data</th>
+            <th scope="col">Capacidade extrapolada</th>
+            <th scope="col">Distânciamento social desrespeitado</th>
+        </thead>
+        <tbody id="tbody">
+        </tbody>
+    </table>
+{% endblock %}
+
+{% block script %}
+
+    <script>
+        const selectConfig = $('#select-config');
+        selectConfig.change(async () => {
+            const configId = selectConfig.find(":selected").val();
+            const response = await fetch('/occurrences/' + configId);
+            const data = await response.json();
+            data.dates.forEach(occ => {
+                const date = new Date(occ.occurrency_date)
+                const ts = Math.round(date.getTime()/1000)
+
+                const formatedDate = `${date.getDay()}/${date.getMonth()}/${date.getFullYear()}`
+               
+                $('#tbody').append(
+                    `<tr class="occurrence-dates" date="${date}">
+                        <th scope="row"><a href="/occurrences/${configId}/${ts}">${formatedDate}</a></th>
+                        <td>${occ.capacity_qtd} vezes</td>
+                        <td>${occ.distancing_qtd} vezes</td>
+                    </tr>
+                    `);
+            });
+ 
+        });
+
+    </script>
+
+{% endblock %}

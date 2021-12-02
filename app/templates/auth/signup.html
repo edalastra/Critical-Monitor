@@ -1,54 +1,79 @@
 {% extends 'base.html' %}
 
 {% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/signin.css')}}">
+
 {% endblock %}
 
 {% block content %}
 
+<div class="signin-container">
+    <form class="form-signin " action="" , method="POST">
+        <div class="text-center">
+            <h1 class="h4">Cadastro</h1>
+            <span>Preencha os campos abaixo para continuar.</span>
+        </div>
+        {{ form_signup.csrf_token }}
+        <div class="row mb-3">
+            <div class="col">
+                <div class="form-group">
+                    <label for="input-name" class="form-label" for="">Nome Completo</label>
+                    {{ form_signup.name(id='input-name',class='form-control', placeholder='Seu Nome') }}
+                    {% if form_signup.errors.name %}
+                    <span class="text-danger">{{form_signup.errors.name}}</span>
+                    {% endif %}
+                </div>
+            </div>
+           
+        </div>
+        <div class="row mb-3">
+            <div class="col">
+                <div class="form-group">
+                    <label class="form-label" v for="">Email</label>
+                    {{ form_signup.email(id='input-email', class='form-control', placeholder='seu@email.com') }}
+                    {% for err in form_signup.errors.email %}
+                        <span for='input-email' class="text-danger">{{err}}</span>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="col">
+                <div class="form-group">
+                    <label for="">CPF</label>
+                    {{ form_signup.cpf(class='form-control') }}
+                    {% for err in form_signup.errors.cpf %}
+                    <span class="text-danger">{{err}}</span>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        <div class="row mb-3">
+            <div class="col">
+                <div class="form-group">
+                    <label class="form-label" for="">Senha</label>
+                    {{ form_signup.password(class='form-control') }}
+                    {% for err in form_signup.errors.password %}
+                        <span class="text-danger">{{err}}</span>
+                    {% endfor %}
+            
+                </div>
+            </div>
+            <div class="col">
+                <div class="form-group">
+    
+                    <label class="form-label" for="">Confirme sua senha</label>
+                    {{ form_signup.repeat_password(class='form-control') }}
+                    {% for err in form_signup.errors.repeat_password %}
+                        <span class="text-danger">{{err}}</span>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        
+        <button type="submit" class="mt-3 btn btn-dark">Enviar</button>
+    
+    </form>
+</div>
 
-<form action="" , method="POST">
-    {{ form_signup.csrf_token }}
-    <div class="form-group">
-        <label class="form-label" for="">Nome Completo</label>
-        {{ form_signup.name(class='form-control') }}
-        {% if form_signup.errors.name %}
-        <span class="text-danger">{{form_signup.errors.name}}</span>
-        {% endif %}
-    </div>
-    <div class="form-group">
-        <label class="form-label" v for="">Email</label>
-        {{ form_signup.email(class='form-control') }}
-        {% for err in form_signup.errors.email %}
-            <span class="text-danger">{{err}}</span>
-        {% endfor %}
-    </div>
-    <div class="form-group">
-        <label for="">CPF</label>
-        {{ form_signup.cpf(class='form-control') }}
-        {% for err in form_signup.errors.cpf %}
-        <span class="text-danger">{{err}}</span>
-        {% endfor %}
-    </div>
-    <div class="form-group">
-        <label class="form-label" for="">Senha</label>
-        {{ form_signup.password(class='form-control') }}
-        {% for err in form_signup.errors.password %}
-            <span class="text-danger">{{err}}</span>
-        {% endfor %}
-
-    </div>
-    <div class="form-group">
-
-        <label class="form-label" for="">Confirme sua senha</label>
-        {{ form_signup.repeat_password(class='form-control') }}
-        {% for err in form_signup.errors.repeat_password %}
-            <span class="text-danger">{{err}}</span>
-        {% endfor %}
-    </div>
-
-    <button type="submit" class="mt-3 btn btn-dark">Enviar</button>
-
-</form>
 
 
 {% endblock %}

@@ -1,7 +1,13 @@
 {% extends 'base.html' %}
 
-{% block content %}
 
+{% block content %}
+    <div id="alert-distance" class="mt-3 alert alert-info" role="alert">
+        Selecione uma sala para iniciar.
+    </div>
+    <div id="alert-capacity" class="alert alert-info" role="alert">
+        Selecione uma sala para iniciar.
+    </div>
     <div class="row">
         <div class="col">
             <select id="select-config" class="form-select" aria-label="Default select example">
@@ -20,31 +26,66 @@
                       </div>
                 </div>
             </div>
+            <div class="row">
+                <div class="col col-sm">
+                    <canvas id="capacity-chart"></canvas>
+                </div>
+            </div>
 
         </div>
         <div class="col">
-            <img id="video-feed" src="">
+            <div class="row">
+                <img id="video-feed" src="{{ url_for('static', filename='img/video-not-working.png') }}">
+            </div>
+            <div hidden id="btn-controls" class="row mt-4 text-align">
+                <div class="col"><button id="start-monitor" type="button" class="btn btn-primary">Iniciar monitoramento</button></div>
+                <div class="col"><button id="stop-monitor" type="button" class="btn btn-danger">Parar monitoramento</button></div>
+            </div>
         </div>
     </div>
 {% endblock %}
 
 {% block script %}
-<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js" integrity="sha512-q/dWJ3kcmjBLU4Qc47E4A9kTB4m3wuTY7vkFJDTZKjTs8jhyGQnaUrxa0Ytd0ssMZhbNua9hE+E7Qv1j+DyZwA==" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.6.0/dist/chart.min.js"></script>
 
 <script>
     const selectConfig = $('#select-config');
     const numPeoples = $('#peoples');
+    const alertDistance = $('#alert-distance');
+    const alertCapacity = $('#alert-capacity');
+    const btnControls = $('#btn-controls');
     const socket = io();
-    socket.on('update_status', function(message) {
+    
+    socket.on('update_status', message => {
         numPeoples.text(message.num_peoples);
     });
-    selectConfig.change(async () => {
-        const configId = selectConfig.find(":selected").attr('config-id');
-        
-        document.cookie = "camera_address=" + configId;
-        
-        $("#video-feed").attr("src", "{{ url_for('monitor.video_feed') }}");
+    socket.on('alert-distance', data => {
+        alertDistance.removeClass('alert-info');
+        alertDistance.removeClass('alert-success');
+        alertDistance.removeClass('alert-danger');
+        alertDistance.addClass('alert-' + data.status);
+        alertDistance.text(data.message);
+    });
+    socket.on('alert-capacity', data => {
+        alertCapacity.removeClass('alert-info');
+        alertCapacity.removeClass('alert-success');
+        alertCapacity.removeClass('alert-danger');
+        alertCapacity.addClass('alert-' + data.status);
+        alertCapacity.text(data.message);
     });
 
+
+
+    selectConfig.change(async () => {
+        const configId = selectConfig.find(":selected").attr('config-id');
+        document.cookie = "camera_address=" + configId;
+        await $("#video-feed").attr("src", "{{ url_for('static', filename='img/video-not-working.png') }}");
+        btnControls.attr("hidden", false);
+    });
+    btnControls.find('#start-monitor').click(async () => await $("#video-feed").attr("src", "{{ url_for('monitor.video_feed') }}"));
+    btnControls.find('#stop-monitor').click(async () => await $("#video-feed").attr("src", "{{ url_for('static', filename='img/video-not-working.png') }}"));
+
 </script>
+<script src="{{ url_for('static', filename='js/charts.js') }}"></script>
+
 {% endblock %}
