@@ -11,3 +11,6 @@ opencv-python
 tensorflow
 imutils
 pyyaml
+flask_socketio
+scipy
+easydict

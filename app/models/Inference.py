@@ -74,17 +74,17 @@ class Inference():
       
             # Load the frame
             (frame_exists, frame) = vs.read()
-            
+
         
             # Test if it has reached the end of the video
             if not frame_exists:
                 break
             else:
                 # Resize the image to the correct size
+                print("frame shape : ",frame.shape)
                 frame = imutils.resize(frame, width=int(self.size_frame))
-
                 # Make the predictions for this frame
-                (boxes, scores, classes) = self.model.model_inference(frame)
+                (boxes, scores, classes, idxs) = self.model.model_inference(frame)
 
                 # Get the human detected in the frame and return the 2 points to build the bounding box  
                 array_boxes_detected = self.get_human_box_detection(boxes,scores,classes,frame.shape[0],frame.shape[1])
@@ -113,9 +113,11 @@ class Inference():
 
                 if len(transformed_downoids) >= 1:
                     for index,downoid in enumerate(transformed_downoids):
-                        if not (downoid[0] > width or downoid[0] < 0 or downoid[1] > height+200 or downoid[1] < 0 ):
-                            cv2.rectangle(frame,(array_boxes_detected[index][1],array_boxes_detected[index][0]),(array_boxes_detected[index][3],array_boxes_detected[index][2]),self.COLOR_GREEN,2)
-
+                        #if not (downoid[0] > width or downoid[0] < 0 or downoid[1] > height+200 or downoid[1] < 0 ):
+                        cv2.rectangle(frame,(array_boxes_detected[index][0],array_boxes_detected[index][1]),(array_boxes_detected[index][2],array_boxes_detected[index][3]),self.COLOR_GREEN,2)
+                        # cv2.rectangle(frame, (array_boxes_detected[index][0], array_boxes_detected[index][1]-30), (array_boxes_detected[index][0])+len(str(idxs[index]))*17, int(array_boxes_detected[index][1])), color, -1)
+                        # cv2.putText(frame, str(idxs[index]),(array_boxes_detected[index][0]), int(array_boxes_detected[index][1]-10)),0, 0.75, (255,255,255),2)
+                   
                     # Iterate over every possible 2 by 2 between the points combinations 
                     list_indexes = list(itertools.combinations(range(len(transformed_downoids)), 2))
                     for i,pair in enumerate(itertools.combinations(transformed_downoids, r=2)):
@@ -160,25 +162,25 @@ class Inference():
         @ height : of the image -> to get the real pixel value
         @ width : of the image -> to get the real pixel value
         """
-        array_boxes = list() # Create an empty list
-        for i in range(len(scores)):
+        # array_boxes = list() # Create an empty list
+        # for i in range(len(scores)):
            
-            #If the class of   the detected object is 1 and the confidence of the prediction is > 0.6
-            if classes[i] == 0 and scores[i] > 0.5:
-                # To transform the box value into pixel coordonate values.
-                #box = [boxes[0,i,0],boxes[0,i,1],boxes[0,i,2],boxes[0,i,3]] * np.array([height, width, height, width])
-                # Add the results converted to int
-                ymin = int(max(1,(boxes[i][0] * height)))
-                xmin = int(max(1,(boxes[i][1] * width)))
-                ymax = int(min(height,(boxes[i][2] * height)))
-                xmax = int(min(width,(boxes[i][3] * width)))
+        #     #If the class of   the detected object is 1 and the confidence of the prediction is > 0.6
+        #     if classes[i] == 0 and scores[i] > 0.5:
+        #         # To transform the box value into pixel coordonate values.
+        #         #box = [boxes[0,i,0],boxes[0,i,1],boxes[0,i,2],boxes[0,i,3]] * np.array([height, width, height, width])
+        #         # Add the results converted to int
+        #         # ymin = int(max(1,(boxes[i][0] * height)))
+        #         # xmin = int(max(1,(boxes[i][1] * width)))
+        #         # ymax = int(min(height,(boxes[i][2] * height)))
+        #         # xmax = int(min(width,(boxes[i][3] * width)))
 
-                # ymin = int(max(1,(boxes[i][0] )))
-                # xmin = int(max(1,(boxes[i][1] )))
-                # ymax = int(min(height,(boxes[i][2] )))
-                # xmax = int(min(width,(boxes[i][3])))
-                array_boxes.append((int(ymin),int(xmin),int(ymax),int(xmax)))
-                #pass
+        #         ymin = int(max(1,(boxes[i][0] )))
+        #         xmin = int(max(1,(boxes[i][1] )))
+        #         ymax = int(min(height,(boxes[i][2] )))
+        #         xmax = int(min(width,(boxes[i][3])))
+        #         array_boxes.append((int(ymin),int(xmin),int(ymax),int(xmax)))
+        #         #pass
 
         # for track in tracker.tracks:
         #     if not track.is_confirmed() or track.time_since_update > 1:
@@ -187,7 +189,7 @@ class Inference():
         #     class_name = track.get_class()
         #     array_boxes.append((int(bbox[0]),int(bbox[1]),int(bbox[2]),int(bbox[3])))
         #print(tracker.tracks)
-        return array_boxes
+        return boxes
 
 
     def get_centroids_and_groundpoints(self, array_boxes_detected):

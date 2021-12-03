@@ -45,13 +45,15 @@ class Model:
         config = ConfigProto()
         config.gpu_options.allow_growth = True    
         self.session = InteractiveSession(config=config)
-        self.interpreter = Interpreter(model_path=model_path)
+
+        self.interpreter =  tf.lite.Interpreter(model_path=model_path)
         self.interpreter.allocate_tensors()
         self.input_details = self.interpreter.get_input_details()
         self.output_details = self.interpreter.get_output_details()
         self.height = self.input_details[0]['shape'][1]
         self.width = self.input_details[0]['shape'][2] 
         self.floating_model = (self.input_details[0]['dtype'] == np.float32)
+
         self.input_mean = 127.0
         self.input_std = 127.5
         max_cosine_distance = 0.4
@@ -117,6 +119,7 @@ class Model:
         pred = [self.interpreter.get_tensor(self.output_details[i]['index']) for i in range(len(self.output_details))]
 
         boxes, pred_conf = filter_boxes(pred[0], pred[1], score_threshold=0.25, input_shape=tf.constant([416, 416]))
+
         boxes, scores, classes, valid_detections = tf.image.combined_non_max_suppression(
             boxes=tf.reshape(boxes, (tf.shape(boxes)[0], -1, 1, 4)),
             scores=tf.reshape(
@@ -126,6 +129,7 @@ class Model:
             iou_threshold=0.45,
             score_threshold=0.45
             )
+            
         num_objects = valid_detections.numpy()[0]
         bboxes = boxes.numpy()[0]
         bboxes = bboxes[0:int(num_objects)]
@@ -134,21 +138,23 @@ class Model:
         classes_npy = classes.numpy()[0]
         classes_npy = classes_npy[0:int(num_objects)]
 
+        original_h, original_w, _ = frame.shape
+        bboxes = format_boxes(bboxes, original_h, original_w)
+
         pred_bbox = [bboxes, scores_npy, classes_npy , num_objects]
 
-        names = np.array(['person'])
+        names = np.array(['person' for _ in range(num_objects)])
         count = len(names)
     
         """ Tracking 
         # """
         # if FLAGS.count:
         #     cv2.putText(frame, "Objects being tracked: {}".format(count), (5, 35), cv2.FONT_HERSHEY_COMPLEX_SMALL, 2, (0, 255, 0), 2)
-        #     print("Objects being tracked: {}".format(count))
+        print("Objects being tracked: {}".format(count))
 
         # encode yolo detections and feed to tracker
         features = self.encoder(frame, bboxes)
         detections = [Detection(bbox, score, class_name, feature) for bbox, score, class_name, feature in zip(bboxes, scores_npy, names, features)]
-
 
 
         # run non-maxima supression
@@ -159,6 +165,18 @@ class Model:
         detections = [detections[i] for i in indices]       
 
         # Call the tracker
+        self.tracker.predict()
+        self.tracker.update(detections)
 
         # update tracks
-        return  bboxes, scores_npy, classes_npy
+        indexIDs = []
+        bauxis = []
+        for track in self.tracker.tracks:
+            if not track.is_confirmed() or track.time_since_update > 1:
+                continue         
+            indexIDs.append(int(track.track_id))
+            bbox = track.to_tlbr()
+            bauxis.append([int(bbox[0]), int(bbox[1]), int(bbox[2]), int(bbox[3])])
+
+        # update tracks
+        return  bauxis, scores_npy, classes_npy, indexIDs
