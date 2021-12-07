@@ -16,7 +16,7 @@ from app.monitor.core.utils import format_boxes
 
 
 class Inference():
-    def __init__(self, config_id, width_og, height_og, size_frame, points, capacity, camera_address):
+    def __init__(self, config_id, width_og, height_og, size_frame, points, capacity, camera_address, minimum_distance):
         self.config_id = config_id
         self.corner_points = points
         self.width_og = width_og
@@ -29,7 +29,7 @@ class Inference():
         #self.model = Model('app/monitor/models/ssdlite_object_detection')
 
         #self.model = HogModel()
-        self.distance_minimum = "2"
+        self.minumun_distance = minimum_distance
         self.capacity = capacity
         self.current_capacity = 0
         self.COLOR_RED = (0, 0, 255)
@@ -111,12 +111,12 @@ class Inference():
                     socketio.emit('alert-capacity', {'status': 'success', 'message': 'Lotação de pessoas não antigiu a capacidade máxima.'})
                 self.current_capacity = len(transformed_downoids)
 
-                if len(transformed_downoids) >= 1:
+                if len(transformed_downoids) >= 2:
                     for index,downoid in enumerate(transformed_downoids):
-                        #if not (downoid[0] > width or downoid[0] < 0 or downoid[1] > height+200 or downoid[1] < 0 ):
-                        cv2.rectangle(frame,(array_boxes_detected[index][0],array_boxes_detected[index][1]),(array_boxes_detected[index][2],array_boxes_detected[index][3]),self.COLOR_GREEN,2)
-                        # cv2.rectangle(frame, (array_boxes_detected[index][0], array_boxes_detected[index][1]-30), (array_boxes_detected[index][0])+len(str(idxs[index]))*17, int(array_boxes_detected[index][1])), color, -1)
-                        # cv2.putText(frame, str(idxs[index]),(array_boxes_detected[index][0]), int(array_boxes_detected[index][1]-10)),0, 0.75, (255,255,255),2)
+                        if not (downoid[0] > width or downoid[0] < 0 or downoid[1] > height+200 or downoid[1] < 0 ):
+                            cv2.rectangle(frame,(array_boxes_detected[index][1],array_boxes_detected[index][0]),(array_boxes_detected[index][3],array_boxes_detected[index][2]),self.COLOR_GREEN,2)
+                            cv2.putText(frame, str(idxs[index]),(array_boxes_detected[index][1], array_boxes_detected[index][0]-10),0, 0.75, (255,255,255),2)
+
                    
                     # Iterate over every possible 2 by 2 between the points combinations 
                     list_indexes = list(itertools.combinations(range(len(transformed_downoids)), 2))
@@ -125,11 +125,10 @@ class Inference():
                         if math.sqrt( (pair[0][0] - pair[1][0])**2 + (pair[0][1] - pair[1][1])**2 ) < int(100):
                             # Change the colors of the points that are too close from each other to red
                             if not (pair[0][0] > width or pair[0][0] < 0 or pair[0][1] > height+200  or pair[0][1] < 0 or pair[1][0] > width or pair[1][0] < 0 or pair[1][1] > height+200  or pair[1][1] < 0):
-
-                                # cv2.circle(bird_view_img, (pair[0][0],pair[0][1]), self.BIG_CIRCLE, self.COLOR_RED, 2)
-                                # cv2.circle(bird_view_img, (pair[0][0],pair[0][1]), self.SMALL_CIRCLE, self.COLOR_RED, -1)
-                                # cv2.circle(bird_view_img, (pair[1][0],pair[1][1]), self.BIG_CIRCLE, self.COLOR_RED, 2)
-                                # cv2.circle(bird_view_img, (pair[1][0],pair[1][1]), self.SMALL_CIRCLE, self.COLOR_RED, -1)
+                                cv2.circle(bird_view_img, (int(pair[0][0]),int(pair[0][1])), self.BIG_CIRCLE, self.COLOR_RED, 2)
+                                cv2.circle(bird_view_img, (int(pair[0][0]),int(pair[0][1])), self.SMALL_CIRCLE, self.COLOR_RED, -1)
+                                cv2.circle(bird_view_img, (int(pair[1][0]),int(pair[1][1])), self.BIG_CIRCLE, self.COLOR_RED, 2)
+                                cv2.circle(bird_view_img, (int(pair[1][0]),int(pair[1][1])), self.SMALL_CIRCLE, self.COLOR_RED, -1)
                                 # Get the equivalent indexes of these points in the original frame and change the color to red
                                 socketio.emit('alert-distance', {'status': 'danger', 'message': 'Distânciamento social desrespeitado'})
                                 self.register_occurrency('distânciamento')
@@ -224,7 +223,7 @@ class Inference():
 
     def draw_rectangle(self, frame):
         # Draw rectangle box over the delimitation area
+        cv2.line(frame, (self.corner_points[1][0], self.corner_points[1][1]), (self.corner_points[3][0], self.corner_points[3][1]), self.COLOR_BLUE, thickness=1)
+        cv2.line(frame, (self.corner_points[3][0], self.corner_points[3][1]), (self.corner_points[2][0], self.corner_points[2][1]), self.COLOR_BLUE, thickness=1)
+        cv2.line(frame, (self.corner_points[2][0], self.corner_points[2][1]), (self.corner_points[0][0], self.corner_points[0][1]), self.COLOR_BLUE, thickness=1)
         cv2.line(frame, (self.corner_points[0][0], self.corner_points[0][1]), (self.corner_points[1][0], self.corner_points[1][1]), self.COLOR_BLUE, thickness=1)
-        cv2.line(frame, (self.corner_points[1][0], self.corner_points[1][1]), (self.corner_points[2][0], self.corner_points[2][1]), self.COLOR_BLUE, thickness=1)
-        cv2.line(frame, (self.corner_points[2][0], self.corner_points[2][1]), (self.corner_points[3][0], self.corner_points[3][1]), self.COLOR_BLUE, thickness=1)
-        cv2.line(frame, (self.corner_points[3][0], self.corner_points[3][1]), (self.corner_points[0][0], self.corner_points[0][1]), self.COLOR_BLUE, thickness=1)

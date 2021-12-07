@@ -13,7 +13,7 @@ def new_config(content):
     size_frame = content['size_frame']
     capacity = content['capacity']
 
-    config = Config(room_name, current_user.get_id(), 2, camera_address, points, width, height, size_frame, capacity)
+    config = Config(room_name, current_user.get_id(), 100, camera_address, points, width, height, size_frame, capacity)
     db.session.add(config)
     db.session.commit()
 

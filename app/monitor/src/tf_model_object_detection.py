@@ -176,7 +176,7 @@ class Model:
                 continue         
             indexIDs.append(int(track.track_id))
             bbox = track.to_tlbr()
-            bauxis.append([int(bbox[0]), int(bbox[1]), int(bbox[2]), int(bbox[3])])
+            bauxis.append([int(bbox[1]), int(bbox[0]), int(bbox[3]), int(bbox[2])])
 
         # update tracks
         return  bauxis, scores_npy, classes_npy, indexIDs

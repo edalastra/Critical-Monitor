@@ -103,7 +103,7 @@
             <td>{{ config.capacity }}</td>
 
             <td>
-                <form action="{{ url_for('monitor.delete_config', config_id=config.id) }}" method="post">
+                <form action="{{ url_for('monitor.config.delete_config', config_id=config.id) }}" method="post">
                     <input class="btn btn-danger" type=submit value=Excluir>
                 </form>
             </td>
@@ -148,7 +148,7 @@
             return;
         }
 
-        const response = await fetch("{{ url_for('monitor.register_config') }}", {
+        const response = await fetch("{{ url_for('monitor.config.register_config') }}", {
             method: 'POST',
             headers: {
                 'Accept': 'application/json',
@@ -174,7 +174,7 @@
     verifyCamera.click(async e => {
         e.preventDefault();
         $("#btn-spinner").toggle()
-        const response = await fetch("{{ url_for('monitor.access_camera') }}", {
+        const response = await fetch("{{ url_for('monitor.config.access_camera') }}", {
             method: 'POST',
             headers: {
                 'Accept': 'application/json',

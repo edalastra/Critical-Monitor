@@ -25,18 +25,16 @@ def signup():
     if current_user.is_authenticated:
         return redirect(url_for('monitor.home'))
     form = SignupForm()
-
     if form.validate_on_submit():
         register(form)
-        redirect(url_for('monitor.auth.signin'))
-
+        redirect(url_for('auth.signin'))
     return render_template('auth/signup.html', form_signup=form)
 
 @auth.route('/logout')
 def logout():
     logout_user()
-    return redirect(url_for('monitor.auth.signin')) 
+    return redirect(url_for('auth.signin')) 
 
 @login_manager.unauthorized_handler
 def unauthorized_callback():
-    return redirect(url_for('monitor.auth.signin'))
+    return redirect(url_for('auth.signin'))

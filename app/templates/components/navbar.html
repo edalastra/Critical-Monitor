@@ -18,9 +18,9 @@
   <span class="navbar-text">
     <a class="nav-link disabled" href="#">{{ user.name }}</a>
   </span>
-  <a class="btn btn-outline-secondary mr-4" href="{{ url_for('monitor.auth.logout') }}">Sair</a>
+  <a class="btn btn-outline-secondary mr-4" href="{{ url_for('auth.logout') }}">Sair</a>
   {% else %}
-  <a class="btn btn-outline-secondary " href="{{ url_for('monitor.auth.signin') }}">Entrar</a>
+  <a class="btn btn-outline-secondary " href="{{ url_for('auth.signin') }}">Entrar</a>
   {% endif %}
 </nav>
 {% endmacro %}
