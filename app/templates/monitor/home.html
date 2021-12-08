@@ -1,4 +1,7 @@
 {% extends 'base.html' %}
+{% block head %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/home.css') }}">
+{% endblock %}
 
 
 {% block content %}
@@ -8,163 +11,181 @@
 <div id="alert-capacity" class="alert alert-info" role="alert">
     Selecione uma sala para iniciar.
 </div>
+
 <div class="row">
-    <div class="col">
-        <div class="row">
-            <select id="select-config" class="form-select" aria-label="Default select example">
-                <option selected disabled>Seleciona uma sala</option>
-
-                {% for config in configs %}
-                    <option value="{{ config.id }}">{{ config.room_name }}</option>
-                {% endfor %}
-            </select>
-        </div>
-        <div class="row mt-4">
-            <img id="video-feed" src="{{ url_for('static', filename='img/video-not-working.png') }}">
-        </div>
-        <div hidden id="btn-controls" class="row mt-4 text-align">
-            <div class="col"><button id="start-monitor" type="button" class="btn btn-primary">Iniciar
-                    monitoramento</button></div>
-            <div class="col"><button id="stop-monitor" type="button" class="btn btn-danger">Parar monitoramento</button>
+    <div class="col-sm-3">
+        <div class="h-100 card">
+            <div class="card-body text-center">
+                <h5 class="card-title">Número de pessoas na sala</h5>
+                <h1 class="h3 " id="peoples">0</h1>
             </div>
         </div>
     </div>
-    <div class="col">
-        <div class="row">
-            <div class="col-sm-6">
-                <div class="h-100 card">
-                    <div class="card-body text-center">
-                        <h5 class="card-title">Número de pessoas na sala</h5>
-                        <h1 class="h3 " id="peoples">0</h1>
-                    </div>
-                </div>
-            </div>
-            <div class="col-sm-6">
-                <div class="h-100 card">
-                    <div class="card-body text-center">
-                        <h5 class="card-title">Quantidade máxima registrada</h5>
-                        <h1 class="h3 text-center" id="maxpeoples">0</h1>
-                    </div>
-                </div>
-            </div>
-
-        </div>
-        <div class="row">
-            <div class="col-sm-6">
-                <div class="h-100 card">
-                    <div class="card-body text-center">
-                        <h5 class="card-title">Capacidade máxima:</h5>
-                        <h1 class="h3 " id="maxCapacityConfigured">0</h1>
-                        <span class="d-inline-block" tabindex="0" data-bs-toggle="tooltip"
-                            title="Para efetuar alteração é necessario parar o monitoramento.">
-                            <button id="btn-alter-capacity" class="btn alter-btn btn-link">Alterar</button>
-                        </span>
-                    </div>
-                </div>
-            </div>
-            <div class="col-sm-6">
-                <div class="h-100 card">
-                    <div class="card-body text-center">
-                        <h5 class="card-title">Distância mínima</h5>
-                        <h1 class="h3 text-center" id="minimunDistanceConfigured">0 px</h1>
-                        <span class="d-inline-block" tabindex="0" data-bs-toggle="tooltip"
-                            title="Para efetuar alteração é necessario parar o monitoramento.">
-                            <button id="btn-alter-distance" class="btn alter-btn btn-link">Alterar</button>
-                        </span>
-
-                    </div>
-                </div>
+    <div class="col-sm-3">
+        <div class="h-100 card">
+            <div class="card-body text-center">
+                <h5 class="card-title">Quantidade máxima registrada</h5>
+                <h1 class="h3 text-center" id="maxpeoples">0</h1>
             </div>
         </div>
     </div>
 
-    {% endblock %}
+    <div class="col-sm-3">
+        <div class="h-100 card">
+            <div class="card-body text-center">
+                <h5 class="card-title">Capacidade máxima:</h5>
+                <h1 class="h3 " id="maxCapacityConfigured">0</h1>
+                <span class="d-inline-block" tabindex="0" data-bs-toggle="tooltip"
+                    title="Para efetuar alteração é necessario parar o monitoramento.">
+                    <button id="btn-alter-capacity" class="btn alter-btn btn-link">Alterar</button>
+                </span>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-3">
+        <div class="h-100 card">
+            <div class="card-body text-center">
+                <h5 class="card-title">Distância mínima</h5>
+                <h1 class="h3 text-center" id="minimunDistanceConfigured">0 px</h1>
+                <span class="d-inline-block" tabindex="0" data-bs-toggle="tooltip"
+                    title="Para efetuar alteração é necessario parar o monitoramento.">
+                    <button id="btn-alter-distance" class="btn alter-btn btn-link">Alterar</button>
+                </span>
 
-    {% block script %}
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.6.0/dist/chart.min.js"></script>
-
-    <script>
-        const selectConfig = $('#select-config');
-        const numPeoples = $('#peoples');
-        const alertDistance = $('#alert-distance');
-        const alertCapacity = $('#alert-capacity');
-        const btnControls = $('#btn-controls');
-        const maxPeoples = $('#maxpeoples');
-        const maxCapacityConfigured = $('#maxCapacityConfigured');
-        const minimunDistanceConfigured = $('#minimunDistanceConfigured');
-        const btnAlterCapacity = $('#btn-alter-capacity');
-        const btnAlterDistance = $('#btn-alter-distance');
-        const alterBtns = $('.alter-btn');
-        let config = {};
-
-        // let configs = 
-        // configs = JSON.parse(configs.substring(1, configs.length - 1));
-        let configSelected = null;
-
-        const socket = io();
-        let maxCapacityRegistred = 0;
-
-
-        socket.on('update_status', message => {
-            if (message.num_peoples > maxCapacityRegistred) {
-                maxCapacityRegistred = message.num_peoples;
-                maxPeoples.text(maxCapacityRegistred);
-            }
-            numPeoples.text(message.num_peoples);
+            </div>
+        </div>
+    </div>
+</div>
 
 
-        });
-        socket.on('alert-distance', data => {
-            alertDistance.removeClass('alert-info');
-            alertDistance.removeClass('alert-success');
-            alertDistance.removeClass('alert-danger');
-            alertDistance.addClass('alert-' + data.status);
-            alertDistance.text(data.message);
-        });
-        socket.on('alert-capacity', data => {
-            alertCapacity.removeClass('alert-info');
-            alertCapacity.removeClass('alert-success');
-            alertCapacity.removeClass('alert-danger');
-            alertCapacity.addClass('alert-' + data.status);
-            alertCapacity.text(data.message);
-        });
+<div class="row justify-content-md-center mt-4">
+    <div class="col col-md-1">
+        <h1 class="h4">Sala:</h1>
+    </div>
+    <div class="col-md-5">
+        <select id="select-config" class="form-select" aria-label="Default select example">
+            <option selected disabled>Selecione uma sala:</option>
+    
+            {% for config in configs %}
+            <option value="{{ config.id }}">{{ config.room_name }}</option>
+            {% endfor %}
+        </select>
+    </div>
+</div>
+
+<div class="row justify-content-md-center mt-4">
+    <div class="col-md-auto">
+        <span class="d-inline-block" tabindex="0" data-bs-toggle="tooltip"
+        title="Para monitoramento">
+            <img class="rounded mx-auto d-block" id="video-feed" src="{{ url_for('static', filename='img/video-not-working.png') }}">
+        </span>          
+    </div>
+</div>
 
 
 
-        selectConfig.change(async () => {
-            const configId = selectConfig.val();
-            configSelected = configId;
-            loadConfig(configId);
 
-            document.cookie = "camera_address=" + configId;
-            await $("#video-feed").attr("src", "{{ url_for('static', filename='img/video-not-working.png') }}");
-            btnControls.attr("hidden", false);
-        });
-        
-        async function loadConfig(configId) {
-            const response = await fetch(`/config/${configId}`);
-            config = await response.json();
-            maxCapacityConfigured.text(config.capacity);
-            minimunDistanceConfigured.text(config.minimun_distance);
+{% endblock %}
+
+{% block script %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.6.0/dist/chart.min.js"></script>
+
+<script>
+    const selectConfig = $('#select-config');
+    const numPeoples = $('#peoples');
+    const alertDistance = $('#alert-distance');
+    const alertCapacity = $('#alert-capacity');
+    const maxPeoples = $('#maxpeoples');
+    const maxCapacityConfigured = $('#maxCapacityConfigured');
+    const minimunDistanceConfigured = $('#minimunDistanceConfigured');
+    const btnAlterCapacity = $('#btn-alter-capacity');
+    const btnAlterDistance = $('#btn-alter-distance');
+    const alterBtns = $('.alter-btn');
+    const monitoStarted = false;
+    let config = {};
+
+    // let configs = 
+    // configs = JSON.parse(configs.substring(1, configs.length - 1));
+    let configSelected = null;
+
+    const socket = io();
+    let maxCapacityRegistred = 0;
+
+
+    socket.on('update_status', message => {
+        if (message.num_peoples > maxCapacityRegistred) {
+            maxCapacityRegistred = message.num_peoples;
+            maxPeoples.text(maxCapacityRegistred);
         }
+        numPeoples.text(message.num_peoples);
 
-        btnControls.find('#start-monitor').click(startMonitoring);
-        btnControls.find('#stop-monitor').click(stopMonittoring);
 
-        async function startMonitoring() {
-            await $("#video-feed").attr("src", "{{ url_for('monitor.video_feed') }}");
-            btnAlterCapacity.prop('disabled', true);
-            btnAlterDistance.prop('disabled', true);
-        };
-        function stopMonittoring() {
-            $("#video-feed").attr("src", "{{ url_for('static', filename='img/video-not-working.png') }}");
-            btnAlterCapacity.prop('disabled', false);
-            btnAlterDistance.prop('disabled', false);
-        };
+    });
+    socket.on('alert-distance', data => {
+        alertDistance.removeClass('alert-info');
+        alertDistance.removeClass('alert-success');
+        alertDistance.removeClass('alert-danger');
+        alertDistance.addClass('alert-' + data.status);
+        alertDistance.text(data.message);
+    });
+    socket.on('alert-capacity', data => {
+        alertCapacity.removeClass('alert-info');
+        alertCapacity.removeClass('alert-success');
+        alertCapacity.removeClass('alert-danger');
+        alertCapacity.addClass('alert-' + data.status);
+        alertCapacity.text(data.message);
+    });
 
-        btnAlterCapacity.click(async () => {
-            const current_value = maxCapacityConfigured.text();
-            maxCapacityConfigured.html(`
+
+
+    selectConfig.change(async () => {
+        const configId = selectConfig.val();
+        configSelected = configId;
+        loadConfig(configId);
+
+        document.cookie = "camera_address=" + configId;
+        await $("#video-feed").attr("src", "{{ url_for('static', filename='img/video-not-working.png') }}");
+        $('.play').css('display', 'block');
+        $('.play').attr("hidden", false);
+        $('.play').click(startMonitoring)
+        $('.stop').click(stopMonitoring)
+        $("#video-feed").addClass("brightness")
+    });
+
+    async function loadConfig(configId) {
+        const response = await fetch(`/config/${configId}`);
+        config = await response.json();
+        maxCapacityConfigured.text(config.capacity);
+        minimunDistanceConfigured.text(config.minimun_distance + ' px');
+    }
+
+
+    async function startMonitoring() {
+        $(this).attr("disabled", true);
+        $(this).find('.spinner-border').attr("hidden", false);
+        await $("#video-feed").attr("src", "{{ url_for('monitor.video_feed') }}");
+        btnAlterCapacity.prop('disabled', true);
+        btnAlterDistance.prop('disabled', true);
+        $(this).attr("disabled", false);
+        $(this).find('.spinner-border').attr("hidden", true);
+        $('.play').css('display', 'none');
+        $('.play').attr("hidden", false);
+        $('.stop').attr("hidden", false);
+        $("#video-feed").removeClass("brightness")
+    };
+    async function stopMonitoring() {
+        $("#video-feed").attr("src", "{{ url_for('static', filename='img/video-not-working.png') }}");
+        btnAlterCapacity.prop('disabled', false);
+        btnAlterDistance.prop('disabled', false);
+        $('.play').css('display', 'block');
+        $('.play').attr("hidden", false);
+        $('.stop').attr("hidden", true);
+        $("#video-feed").addClass("brightness")
+    };
+
+    btnAlterCapacity.click(async () => {
+        const current_value = maxCapacityConfigured.text();
+        maxCapacityConfigured.html(`
                 <div class="input-group mb-3">
                 <input type="text" value="${current_value}" id="new-capacity" class="form-control">
                 <div class="input-group-append">
@@ -172,28 +193,28 @@
                 </div>
                 </div>
             `);
-            const inputNewCapacity = $('#new-capacity');
+        const inputNewCapacity = $('#new-capacity');
 
-            $('#button-addon1').on('click', async () => {
-                if (inputNewCapacity.val() != 0 && inputNewCapacity.val() != current_value) {
-                    const response = await fetch(`/config/${configSelected}/alter_attr?attr=capacity`, {
-                        method: 'PUT',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            capacity: inputNewCapacity.val()
-                        })
-                    });
-                }
-                loadConfig(configSelected);
+        $('#button-addon1').on('click', async () => {
+            if (inputNewCapacity.val() != 0 && inputNewCapacity.val() != current_value) {
+                const response = await fetch(`/config/${configSelected}/alter_attr?attr=capacity`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        capacity: inputNewCapacity.val()
+                    })
+                });
+            }
+            loadConfig(configSelected);
 
-            });
         });
+    });
 
-        btnAlterDistance.click(async () => {
-            const current_value = minimunDistanceConfigured.text();
-            minimunDistanceConfigured.html(`
+    btnAlterDistance.click(async () => {
+        const current_value = minimunDistanceConfigured.text();
+        minimunDistanceConfigured.html(`
             <div class="input-group mb-3">
                 <input type="text" value="${current_value}" id="new-md" class="form-control">
                 <div class="input-group-append">
@@ -201,25 +222,25 @@
                 </div>
                 </div>
             `);
-            const inputNewMD = $('#new-md');
-            $('#button-addon2').on('click', async () => {
-                if (inputNewMD.val() != 0 && inputNewMD.val() != current_value) {
-                    const response = await fetch(`/config/${configSelected}/alter_attr?attr=minimum_distance`, {
-                        method: 'PUT',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            minimum_distance: inputNewMD.val()
-                        })
+        const inputNewMD = $('#new-md');
+        $('#button-addon2').on('click', async () => {
+            if (inputNewMD.val() != 0 && inputNewMD.val() != current_value) {
+                const response = await fetch(`/config/${configSelected}/alter_attr?attr=minimum_distance`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        minimum_distance: inputNewMD.val()
                     })
-                }
-                loadConfig(configSelected);
+                })
+            }
+            loadConfig(configSelected);
 
-            });
         });
+    });
 
-    </script>
-    <script src="{{ url_for('static', filename='js/charts.js') }}"></script>
+</script>
+<script src="{{ url_for('static', filename='js/charts.js') }}"></script>
 
-    {% endblock %}
+{% endblock %}

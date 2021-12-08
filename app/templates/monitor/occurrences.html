@@ -2,10 +2,10 @@
 {% from "components/charts.html" import line %}
 {% block content %}
     <div class="row">
-        <div class="col">
+        <div class="col col-md-8">
             {{ line(occurrences_json) }}
         </div>
-        <div style="height: 800px; overflow-y: scroll;" class="col">
+        <div style="height: 800px; overflow-y: scroll;" class="col col-md-4">
             <table class="table table-hover">
                 <thead>
                     <th scope="col">Hora</th>

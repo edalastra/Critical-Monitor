@@ -8,9 +8,17 @@
 {% block content %}
 
 <div class="signin-container">
-    <form class="form-signin " action="" , method="POST">
+    {% if not current_user.is_authenticated %}
+    <form class="form-signin " action="" method="POST">
+    {% else %}
+    <form class="form-signin " action="{{ url_for('auth.edit_profile') }}" method="POST">
+    {% endif %}
         <div class="text-center">
+            {% if not current_user.is_authenticated %}
             <h1 class="h4">Cadastro</h1>
+            {% else %}
+            <h1 class="h4">Editar usuário</h1>
+            {% endif %}
             <span>Preencha os campos abaixo para continuar.</span>
         </div>
         {{ form_signup.csrf_token }}
@@ -18,7 +26,7 @@
             <div class="col">
                 <div class="form-group">
                     <label for="input-name" class="form-label" for="">Nome Completo</label>
-                    {{ form_signup.name(id='input-name',class='form-control', placeholder='Seu Nome') }}
+                    {{ form_signup.name(id='input-name',class='form-control', placeholder='Seu Nome', value=current_user.name) }}
                     {% if form_signup.errors.name %}
                     <span class="text-danger">{{form_signup.errors.name}}</span>
                     {% endif %}
@@ -30,7 +38,7 @@
             <div class="col">
                 <div class="form-group">
                     <label class="form-label" v for="">Email</label>
-                    {{ form_signup.email(id='input-email', class='form-control', placeholder='seu@email.com') }}
+                    {{ form_signup.email(id='input-email', class='form-control', placeholder='seu@email.com', value=current_user.email) }}
                     {% for err in form_signup.errors.email %}
                         <span for='input-email' class="text-danger">{{err}}</span>
                     {% endfor %}
@@ -39,7 +47,7 @@
             <div class="col">
                 <div class="form-group">
                     <label for="">CPF</label>
-                    {{ form_signup.cpf(class='form-control') }}
+                    {{ form_signup.cpf(class='form-control', value=current_user.cpf) }}
                     {% for err in form_signup.errors.cpf %}
                     <span class="text-danger">{{err}}</span>
                     {% endfor %}

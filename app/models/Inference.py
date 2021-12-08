@@ -37,13 +37,21 @@ class Inference():
         self.COLOR_BLUE = (255, 0, 0)
         self.BIG_CIRCLE = 60
         self.SMALL_CIRCLE = 3
+        self.idxs_occ = []
 
-
+    
     def register_occurrency(self, type):
         ts = datetime.datetime.now().timestamp()
         occurrence = Occurrence(type, self.current_capacity, self.config_id)
         db.session.add(occurrence)
         db.session.commit()
+
+    def triggerAlertDistancing(self, idxs1, idxs2):
+        if not idxs1 in self.idxs_occ or not idxs2 in self.idxs_occ:
+            self.idxs_occ += [idxs1, idxs2]
+            socketio.emit('alert-distance', {'status': 'danger', 'message': 'Distânciamento social desrespeitado'})
+            self.register_occurrency('distânciamento')
+        
 
     def init(self):
 
@@ -68,8 +76,9 @@ class Inference():
         # Loop until the end of the video stream
         while True:	
             # Load the image of the ground and resize it to the correct size
-            img = cv2.imread("app/monitor/img/chemin_1.png")
-            bird_view_img = cv2.resize(img, dim, interpolation = cv2.INTER_AREA)
+            bird_view_img = np.zeros((height, width, 3), np.uint8)
+
+            #bird_view_img = cv2.resize(blank_image, dim, interpolation = cv2.INTER_AREA)
 
       
             # Load the frame
@@ -81,7 +90,6 @@ class Inference():
                 break
             else:
                 # Resize the image to the correct size
-                print("frame shape : ",frame.shape)
                 frame = imutils.resize(frame, width=int(self.size_frame))
                 # Make the predictions for this frame
                 (boxes, scores, classes, idxs) = self.model.model_inference(frame)
@@ -96,10 +104,12 @@ class Inference():
                 transformed_downoids = compute_point_perspective_transformation(matrix,array_groundpoints)
                 
                 # Show every point on the top view image 
-                for point in transformed_downoids:
+                for i, point in enumerate(transformed_downoids):
                     x,y = point
                     cv2.circle(bird_view_img, (int(x),int(y)), self.BIG_CIRCLE, self.COLOR_GREEN, 2)
                     cv2.circle(bird_view_img, (int(x),int(y)), self.SMALL_CIRCLE, self.COLOR_GREEN, -1)
+                    cv2.putText(bird_view_img, str(idxs[i]),((int(x),int(y)-10)),0, 0.75, (255,255,255),2)
+
 
                 # Check if 2 or more people have been detected (otherwise no need to detect)
                 socketio.emit('update_status', {'num_peoples':len(transformed_downoids)})
@@ -130,22 +140,23 @@ class Inference():
                                 cv2.circle(bird_view_img, (int(pair[1][0]),int(pair[1][1])), self.BIG_CIRCLE, self.COLOR_RED, 2)
                                 cv2.circle(bird_view_img, (int(pair[1][0]),int(pair[1][1])), self.SMALL_CIRCLE, self.COLOR_RED, -1)
                                 # Get the equivalent indexes of these points in the original frame and change the color to red
-                                socketio.emit('alert-distance', {'status': 'danger', 'message': 'Distânciamento social desrespeitado'})
-                                self.register_occurrency('distânciamento')
+                                #self.register_occurrency('distânciamento')
 
                                 index_pt1 = list_indexes[i][0]
                                 index_pt2 = list_indexes[i][1]
                                 cv2.rectangle(frame,(array_boxes_detected[index_pt1][1],array_boxes_detected[index_pt1][0]),(array_boxes_detected[index_pt1][3],array_boxes_detected[index_pt1][2]),self.COLOR_RED,2)
                                 cv2.rectangle(frame,(array_boxes_detected[index_pt2][1],array_boxes_detected[index_pt2][0]),(array_boxes_detected[index_pt2][3],array_boxes_detected[index_pt2][2]),self.COLOR_RED,2)
-                            else:
-                                socketio.emit('alert', {'status': 'success', 'message': 'Nenhuma ocorrência detectada'})
+                                self.triggerAlertDistancing(index_pt1, idxs[index_pt2])
+                        else:
+                            socketio.emit('alert', {'status': 'success', 'message': 'Nenhuma ocorrência detectada'})
                 self.draw_rectangle(frame)
-                bird_view_img = imutils.resize(bird_view_img, width=int(self.size_frame))
-                added_image = np.concatenate((frame, bird_view_img), axis=1)
+                cv2.putText(frame, 'Vista normal',(10,30),fontFace=cv2.FONT_HERSHEY_COMPLEX_SMALL, color=(255,255,255),fontScale=1)
+                cv2.putText(bird_view_img, 'Vista em perspectiva',(10,30),fontFace=cv2.FONT_HERSHEY_COMPLEX_SMALL, color=(255,255,255),fontScale=1)
 
-                # cv2.imshow('out', bird_view_img)
-                # if cv2.waitKey(25) & 0xFF == ord('q'):
-                #     break
+                bird_view_img = imutils.resize(bird_view_img, width=int(self.size_frame))
+                added_image = cv2.hconcat([frame, bird_view_img])
+                #added_image = np.concatenate((frame, bird_view_img), axis=1)
+
                 ret, buffer = cv2.imencode('.jpg', added_image)
                 bframe = buffer.tobytes()
                 yield (b'--frame\r\n'

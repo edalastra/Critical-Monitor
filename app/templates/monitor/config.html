@@ -15,11 +15,11 @@
                 <h5 class="modal-title" id="staticBackdropLabel">Configurar nova sala</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div hidden id="form-error"  class="alert alert-danger">
+            <div hidden id="form-error" class="alert alert-danger">
                 <strong>Erro! Preenhca todos os campos.</strong>
             </div>
             <div class="modal-body signin-container">
-                
+
                 <div class="row">
                     <div class="col">
                         <form class="form-signin">
@@ -38,8 +38,8 @@
                                 <label class="form-label" for="">Link de vídeo</label>
                                 <input type="text" class="form-control" id="portCamera"
                                     placeholder="Pora ou endereço IP">
-                                    <span id="camera-error" class="text-danger"></span>
-                                </div>
+                                <span id="camera-error" class="text-danger"></span>
+                            </div>
 
                             <div class="form-group mt-4">
                                 <button disabled id="verifyCamera" class="btn btn-dark">
@@ -52,8 +52,9 @@
                         </form>
                     </div>
                     <div class="col camera-calibrate text-center">
-                        <div id="alert-camera"  class="alert alert-warning">
-                            <strong>Atenção! Para uma bom funcionamento é necessário que a câmera esteja posicionada em um ponto alto e voltada apróximadadmente 45º para o chão.</strong>
+                        <div id="alert-camera" class="alert alert-warning">
+                            <strong>Atenção! Para uma bom funcionamento é necessário que a câmera esteja posicionada em
+                                um ponto alto e voltada apróximadadmente 45º para o chão.</strong>
                         </div>
                         <h1 class="h4">Calibrar camera:</h1>
                         <span id="instructions"></span>
@@ -166,7 +167,7 @@
         });
         if (response.status == 200) {
             window.location.replace("/home")
-        }else{
+        } else {
             alert("Erro ao criar sala. Tente novamente.")
         }
     });
@@ -264,32 +265,44 @@
         let paint;
 
         function addClick(x, y, dragging) {
-            if (points.length != 0) {
-                if (points.length == 1 && points[0][0] > x) {
+            if (points.length == 0) {
+                instructions.html("Selecione o <strong>o canto superior direito</strong>.");
+            }
+            if (points.length == 1) {
+                instructions.html("Selecione o <strong>o canto inferior direito</strong>.");
+
+                if (points[0][0] > x) {
                     $("#selection-error").text("Ponto inválido! Selecione o canto superior direito.");
                     return;
                 }
-                else if (points.length == 2 && (points[1][1] > y || points[0][0] > x)) {
-                    $("#selection-error").text("Ponto inválido! Selecione o canto inferior direito direito.");
+            }
+            else if (points.length == 2) {
+                instructions.html("Selecione o <strong>o canto inferior esquerdo</strong>.");
+
+                if (points[1][1] > y || points[0][0] > x) {
+                    $("#selection-error").text("Ponto inválido! Selecione o canto inferior direito.");
                     return;
                 }
-                else if (points.length == 3 && (points[0][1] > y || points[2][0] < x)) {
+            }
+            else if (points.length == 3) {
+                if (points[0][1] > y || points[2][0] < x) {
                     $("#selection-error").text("Ponto inválido! Selecione o canto inferior esquerdo.");
                     return;
                 }
-                else if (points.length == 4) {
-                    return;
-                }
-                else {
-                    $("#selection-error").text("");
-                }
             }
+            else if (points.length == 4) {
+                return;
+            }
+            else {
+                $("#selection-error").text("");
+            }
+
             clickX.push(x);
             clickY.push(y);
             clickDrag.push(dragging);
             points.push([x, y]);
 
-            if( points.length == 4) {
+            if (points.length == 4) {
                 $("#selection-error").text("");
                 $('#canvas').off('click');
                 generate();

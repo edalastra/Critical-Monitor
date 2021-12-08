@@ -13,12 +13,15 @@ class User(db.Model):
         self.name = name
         self.email = email
         self.cpf = cpf
-        hash = bcrypt.hashpw(str(password).encode('utf-8'), bcrypt.gensalt())
-        self.password = hash.decode('utf-8')
+        self.set_password(password)
 
     def verify_password(self, password):
         return bcrypt.checkpw(password.encode('utf-8'), self.password.encode('utf-8'))
-    
+
+    def set_password(self, password):
+        pwhash = bcrypt.hashpw(password.encode('utf8'), bcrypt.gensalt())
+        self.password = pwhash.decode('utf8') # decode the hash to prevent is encoded twice
+
     @property
     def has_config(self):
         stmt = self.query.join(User.config)

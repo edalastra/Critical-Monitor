@@ -7,6 +7,14 @@ def register(form):
     db.session.add(user)
     db.session.commit()
 
+def update(form):
+    user = User.query.filter_by(cpf=form.cpf.data).first()
+    user.name = form.name.data
+    user.email = form.email.data
+    user.cpf = form.cpf.data
+    user.set_password(form.password.data)
+    db.session.commit()
+
 def login(form):
     user = User.query.filter_by(cpf=form.cpf.data).first()
     if user and user.verify_password(form.password.data):
