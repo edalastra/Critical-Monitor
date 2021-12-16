@@ -33,13 +33,15 @@
                                     monitoramento</label>
                                 <input type="text" class="form-control" id="capacity" placeholder="0">
                             </div>
-
+                            <span  data-bs-toggle="tooltip" 
+                                title="Você pode inserir um endereço de um stream de vído, endereço de arquivo de vídeo ou ID de uma webcam.">
                             <div class="form-group">
                                 <label class="form-label" for="">Link de vídeo</label>
                                 <input type="text" class="form-control" id="portCamera"
                                     placeholder="Pora ou endereço IP">
                                 <span id="camera-error" class="text-danger"></span>
                             </div>
+                            </span>
 
                             <div class="form-group mt-4">
                                 <button disabled id="verifyCamera" class="btn btn-dark">
@@ -113,6 +115,10 @@
 
     </tbody>
 </table>
+{% if not configs %}
+<h1 id="info" class="h4 text-center text-secondary">Nenhuma sala foi encontrada.</h1>
+{% endif %}
+
 
 
 {% endblock %}

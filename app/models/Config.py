@@ -1,5 +1,4 @@
 from app import db
-from app.models.Occurrence import Occurrence
 
 class Config(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -20,6 +19,7 @@ class Config(db.Model):
     width_og= db.Column(db.Integer)
     height_og = db.Column(db.Integer)
     occurrences = db.relationship('Occurrence', backref='config', lazy=True, passive_deletes=True)
+    
 
     def __init__(self, room_name, user_id, minimum_distance, camera_address, points, width_og, height_og, size_frame, capacity):
         self.room_name = room_name

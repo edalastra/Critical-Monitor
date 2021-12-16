@@ -58,8 +58,6 @@ def list_occurrences(config_id, occ_date):
     occurrences = Occurrence.query.filter(
         Occurrence.config_id == config_id and (Occurrence.timestamp >= min_date and Occurrence.timestamp <= max_date)
     ).order_by(Occurrence.timestamp.desc()).all()
-    # min_ts =  min(occ_dts)
-    # max_ts =  max(occ_dts)
     dts = [dt for dt in 
        datetime_range(
        datetime(occ_date.year, occ_date.month, occ_date.day + 1 , 0, 0), 
@@ -72,8 +70,9 @@ def list_occurrences(config_id, occ_date):
             if dts[i] <= occ.timestamp and dts[i+1] >= occ.timestamp:
                 count += 1
         data.append(count)
-
+        
     labels = list(map(lambda x: x.strftime("%H:%M"), dts)) 
+
 
     return render_template('monitor/occurrences.html', occurrences=occurrences, occurrences_json=json.dumps({"x": labels, "y": data }, ensure_ascii=False))
 

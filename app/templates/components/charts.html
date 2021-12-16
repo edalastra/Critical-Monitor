@@ -9,6 +9,8 @@
     occurrences_list = JSON.parse(occurrences_list.substring(1 , occurrences_list.length -1))
     const {x, y} = occurrences_list
 
+    console.log(x, y)
+
     const chart = new Chart(ctx, {
         type: 'line',
         data: {

@@ -1,5 +1,11 @@
 from wtforms import ValidationError
 from app.models.User import User
+from flask_login import current_user
+
+def check_password(form, field):
+    print('validada')
+    if not current_user.verify_password(field.data):
+        raise ValidationError("Senha incorreta!")
 
 def unique_email(form, field):
     user = User.query.filter_by(email=field.data).first()

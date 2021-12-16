@@ -1,9 +1,8 @@
-from flask import Blueprint, render_template, Response, redirect, url_for, request, make_response, jsonify
+from flask import Blueprint, flash, Response, redirect, url_for, request, make_response, jsonify
 from app import db
 from flask_login import  current_user
 from app.models.Config import Config
 from app.controllers.monitor_controller import new_config, get_snapshot
-from app.models.User import User
 
 
 config = Blueprint('config', __name__)
@@ -19,9 +18,12 @@ def register_config():
     try:
         content = request.json
         new_config(content)
+        flash(f'Sala {content["room_name"]} configurada com sucesso!', 'success')
         return make_response(jsonify({
             "status": "ok"}), 200)
     except Exception as e:
+        flash(f'Erro ao configurar sala. Verifique os dados e tente novamente!', 'danger')
+
         return make_response(jsonify({
         "status": "Bad Request",
         "description": e

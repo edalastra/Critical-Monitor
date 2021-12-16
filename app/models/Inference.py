@@ -1,4 +1,5 @@
 
+from flask import flash
 from app.monitor.src.tf_model_object_detection import Model
 from app.models.Occurrence import Occurrence
 from app.models.alchemy_encoder import AlchemyEncoder
@@ -10,10 +11,6 @@ import imutils
 from app.monitor.src.bird_view_transfo_functions import compute_perspective_transform,compute_point_perspective_transformation
 import itertools
 import math
-from app.monitor.core.utils import format_boxes
-
-
-
 
 class Inference():
     def __init__(self, config_id, width_og, height_og, size_frame, points, capacity, camera_address, minimum_distance):
@@ -41,7 +38,6 @@ class Inference():
 
     
     def register_occurrency(self, type):
-        ts = datetime.datetime.now().timestamp()
         occurrence = Occurrence(type, self.current_capacity, self.config_id)
         db.session.add(occurrence)
         db.session.commit()
@@ -49,7 +45,6 @@ class Inference():
     def triggerAlertDistancing(self, idxs1, idxs2):
         if not idxs1 in self.idxs_occ or not idxs2 in self.idxs_occ:
             self.idxs_occ += [idxs1, idxs2]
-            socketio.emit('alert-distance', {'status': 'danger', 'message': 'Distânciamento social desrespeitado'})
             self.register_occurrency('distânciamento')
         
 
@@ -70,6 +65,9 @@ class Inference():
         except ValueError:
             video_source = self.camera_address
         vs = cv2.VideoCapture(video_source)
+        socketio.emit('alert-distance', {'status': 'success', 'message': 'Nenhuma ocorrência detectada'})
+        socketio.emit('alert-capacity', {'status': 'success', 'message': 'Lotação de pessoas não antigiu a capacidade máxima.'})
+
 
 
         output_video_1,output_video_2 = None,None
@@ -87,6 +85,7 @@ class Inference():
         
             # Test if it has reached the end of the video
             if not frame_exists:
+                flash('Transmissão encerreda externamente', 'warning')
                 break
             else:
                 # Resize the image to the correct size
@@ -147,8 +146,9 @@ class Inference():
                                 cv2.rectangle(frame,(array_boxes_detected[index_pt1][1],array_boxes_detected[index_pt1][0]),(array_boxes_detected[index_pt1][3],array_boxes_detected[index_pt1][2]),self.COLOR_RED,2)
                                 cv2.rectangle(frame,(array_boxes_detected[index_pt2][1],array_boxes_detected[index_pt2][0]),(array_boxes_detected[index_pt2][3],array_boxes_detected[index_pt2][2]),self.COLOR_RED,2)
                                 self.triggerAlertDistancing(index_pt1, idxs[index_pt2])
-                        else:
-                            socketio.emit('alert', {'status': 'success', 'message': 'Nenhuma ocorrência detectada'})
+                                socketio.emit('alert-distance', {'status': 'danger', 'message': 'Distânciamento social desrespeitado'})
+                            else:
+                                socketio.emit('alert-distance', {'status': 'success', 'message': 'Nenhuma ocorrência detectada'})
                 self.draw_rectangle(frame)
                 cv2.putText(frame, 'Vista normal',(10,30),fontFace=cv2.FONT_HERSHEY_COMPLEX_SMALL, color=(255,255,255),fontScale=1)
                 cv2.putText(bird_view_img, 'Vista em perspectiva',(10,30),fontFace=cv2.FONT_HERSHEY_COMPLEX_SMALL, color=(255,255,255),fontScale=1)

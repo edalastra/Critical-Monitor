@@ -1,3 +1,4 @@
+import celery
 from flask import Flask, redirect, url_for
 from flask.templating import render_template
 import flask_login
@@ -18,8 +19,6 @@ migrate = Migrate(app, db)
 login_manager = LoginManager(app)
 
 socketio = SocketIO(app)
-
-
 
 from app.routes.auth import auth as auth_blueprint
 app.register_blueprint(auth_blueprint)

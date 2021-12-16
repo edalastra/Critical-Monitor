@@ -1,29 +1,36 @@
 {% extends "base.html" %}
 {% from "components/charts.html" import line %}
 {% block content %}
-    <div class="row">
-        <div class="col col-md-8">
-            {{ line(occurrences_json) }}
-        </div>
-        <div style="height: 800px; overflow-y: scroll;" class="col col-md-4">
-            <table class="table table-hover">
-                <thead>
-                    <th scope="col">Hora</th>
-                    <th scope="col">Tipo</th>
-                </thead>
-                <tbody >
-                    {% for occ in occurrences %}
-                    <tr>
-                        <th scope="row">{{ occ.timestamp.strftime("%H:%M:%S") }}</th>
-                        <td>{{ occ.occurrence_type }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-                    
-            </table>
-        </div>
+<div class="row">
+    <div class="col col-md-8">
+        {{ line(occurrences_json) }}
     </div>
-    
+    <div style="height: 800px; overflow-y: scroll;" class="col col-md-4">
+        <table class="table table-hover">
+            <thead>
+                <th scope="col">Hora</th>
+                <th scope="col">Tipo</th>
+                <th scope="col">Qtd. Pessoas</th>
+            </thead>
+            <tbody>
+                {% for occ in occurrences %}
+                <tr>
+                    <th scope="row">{{ occ.timestamp.strftime("%H:%M:%S") }}</th>
+                    <td>{{ occ.occurrence_type }}</td>
+                    <td>{{ occ.amount_of_people }}</td>
+                    <td>
+                        <form action="{{ url_for('monitor.occurrences.delete_occurrence', occurrence_id=occ.id) }}" method="POST">
+                            <input class="btn btn-danger" type=submit value=Excluir>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+
+        </table>
+    </div>
+</div>
+
 {% endblock %}
 
 {% block script %}

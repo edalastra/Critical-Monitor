@@ -1,6 +1,10 @@
-from flask import Blueprint, request, jsonify, make_response
+from flask import Blueprint, request, jsonify, make_response, flash
+from flask.helpers import url_for
+from werkzeug.utils import redirect
 from app import db
 from flask_login import current_user
+from app.models.Occurrence import Occurrence
+from datetime import datetime
 
 occurrences = Blueprint('occurrences', __name__)
 
@@ -27,3 +31,15 @@ def occurrences_per_day(config_id):
             "occurrency_date": r[2]
         })
     return  make_response(jsonify({"dates":occurrences_per_date}), 200)
+
+@occurrences.route('/occurrences/<int:occurrence_id>/delete', methods=['POST'])
+def delete_occurrence(occurrence_id):
+    occurrence = Occurrence.query.get_or_404(occurrence_id)
+    db.session.delete(occurrence)
+    db.session.commit()
+    date = datetime.timestamp(occurrence.timestamp)
+    # date = datetime(time)
+    # date = datetime.timestamp(date)
+    # print(time)
+    flash('Ocorrência excluída com sucesso!', 'success')
+    return redirect(url_for('monitor.list_occurrences', config_id=occurrence.config_id, occ_date=date))

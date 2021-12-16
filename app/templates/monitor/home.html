@@ -5,14 +5,9 @@
 
 
 {% block content %}
-<div id="alert-distance" class="mt-3 alert alert-info" role="alert">
-    Selecione uma sala para iniciar.
-</div>
-<div id="alert-capacity" class="alert alert-info" role="alert">
-    Selecione uma sala para iniciar.
-</div>
 
-<div class="row">
+
+<div class="row mt-4">
     <div class="col-sm-3">
         <div class="h-100 card">
             <div class="card-body text-center">
@@ -64,12 +59,21 @@
     </div>
     <div class="col-md-5">
         <select id="select-config" class="form-select" aria-label="Default select example">
-            <option selected disabled>Selecione uma sala:</option>
+            <option selected disabled >Selecione uma sala:</option>
     
             {% for config in configs %}
             <option value="{{ config.id }}">{{ config.room_name }}</option>
             {% endfor %}
         </select>
+    </div>
+    <div class="col-md-4">
+        <button  data-bs-toggle="tooltip" data-bs-placement="top" title="Clique para iniciar o monitoramento." disabled id="btn-start-monitoring" class="btn btn-primary ">
+            <img src="{{ url_for('static', filename='img/icons/icons8-play-30.png') }}"></img>
+        </button>
+
+        <button hidden  data-bs-toggle="tooltip" data-bs-placement="top" title="Clique para parar o monitoramento." disabled id="btn-stop-monitoring" class="btn btn-danger ">
+            <img src="{{ url_for('static', filename='img/icons/icons8-stop-30.png') }}"></img>
+        </button>
     </div>
 </div>
 
@@ -77,8 +81,21 @@
     <div class="col-md-auto">
         <span class="d-inline-block" tabindex="0" data-bs-toggle="tooltip"
         title="Para monitoramento">
-            <img class="rounded mx-auto d-block" id="video-feed" src="{{ url_for('static', filename='img/video-not-working.png') }}">
+            <img class="rounded img-fluid" id="video-feed" src="{{ url_for('static', filename='img/video-not-working.png') }}">
         </span>          
+    </div>
+</div>
+<div class="row">
+    <div class="col">
+        <div id="alert-distance" class="mt-3 alert alert-info" role="alert">
+            Selecione uma sala para iniciar.
+        </div>
+        
+    </div>
+    <div class="col">
+        <div id="alert-capacity" class="mt-3 alert alert-info" role="alert">
+            Selecione uma sala para iniciar.
+        </div>
     </div>
 </div>
 
@@ -101,6 +118,8 @@
     const btnAlterCapacity = $('#btn-alter-capacity');
     const btnAlterDistance = $('#btn-alter-distance');
     const alterBtns = $('.alter-btn');
+    const btnStartMonitoring = $('#btn-start-monitoring');
+    const btnStopMonitoring = $('#btn-stop-monitoring');
     const monitoStarted = false;
     let config = {};
 
@@ -142,45 +161,36 @@
         const configId = selectConfig.val();
         configSelected = configId;
         loadConfig(configId);
-
         document.cookie = "camera_address=" + configId;
         await $("#video-feed").attr("src", "{{ url_for('static', filename='img/video-not-working.png') }}");
-        $('.play').css('display', 'block');
-        $('.play').attr("hidden", false);
-        $('.play').click(startMonitoring)
-        $('.stop').click(stopMonitoring)
-        $("#video-feed").addClass("brightness")
+        btnStartMonitoring.prop('disabled', false);
+        btnStartMonitoring.click(startMonitoring)
     });
 
     async function loadConfig(configId) {
         const response = await fetch(`/config/${configId}`);
         config = await response.json();
         maxCapacityConfigured.text(config.capacity);
-        minimunDistanceConfigured.text(config.minimun_distance + ' px');
+        minimunDistanceConfigured.text(config.minimun_distance);
     }
 
-
     async function startMonitoring() {
-        $(this).attr("disabled", true);
-        $(this).find('.spinner-border').attr("hidden", false);
+        
         await $("#video-feed").attr("src", "{{ url_for('monitor.video_feed') }}");
         btnAlterCapacity.prop('disabled', true);
         btnAlterDistance.prop('disabled', true);
-        $(this).attr("disabled", false);
-        $(this).find('.spinner-border').attr("hidden", true);
-        $('.play').css('display', 'none');
-        $('.play').attr("hidden", false);
-        $('.stop').attr("hidden", false);
-        $("#video-feed").removeClass("brightness")
+        btnStartMonitoring.prop('hidden', true);
+        btnStopMonitoring.prop('hidden', false);
+        btnStopMonitoring.prop('disabled', false);
+        btnStopMonitoring.click(stopMonitoring);
     };
     async function stopMonitoring() {
-        $("#video-feed").attr("src", "{{ url_for('static', filename='img/video-not-working.png') }}");
+        await $("#video-feed").attr("src", "{{ url_for('static', filename='img/video-not-working.png') }}");
         btnAlterCapacity.prop('disabled', false);
         btnAlterDistance.prop('disabled', false);
-        $('.play').css('display', 'block');
-        $('.play').attr("hidden", false);
-        $('.stop').attr("hidden", true);
-        $("#video-feed").addClass("brightness")
+        btnStartMonitoring.prop('hidden', false);
+        btnStopMonitoring.prop('hidden', true);
+        btnStopMonitoring.prop('disabled', true);
     };
 
     btnAlterCapacity.click(async () => {

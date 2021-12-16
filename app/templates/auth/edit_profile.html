@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/signin.css')}}">
+
+{% endblock %}
+
+{% block content %}
+
+    <form class="form-signin " action="" method="POST">
+   
+        <div class="text-center">
+            
+            <h1 class="h4">Editar usuário</h1>
+            <span>Preencha os campos abaixo para continuar.</span>
+        </div>
+        {{ form_user.csrf_token }}
+        <div class="row mb-3">
+            <div class="col">
+                <div class="form-group">
+                    <label for="input-name" class="form-label" for="">Nome Completo</label>
+                    {{ form_user.name(id='input-name',class='form-control', placeholder='Seu Nome', value=current_user.name) }}
+                    {% if form_user.errors.name %}
+                    <span class="text-danger">{{form_user.errors.name}}</span>
+                    {% endif %}
+                </div>
+            </div>
+           
+        </div>
+        <div class="row mb-3">
+            <div class="col">
+                <div class="form-group">
+                    <label class="form-label" for="">Email</label>
+                    {{ form_user.email(id='input-email', class='form-control', placeholder='seu@email.com', value=current_user.email) }}
+                    {% for err in form_user.errors.email %}
+                        <span for='input-email' class="text-danger">{{err}}</span>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="col">
+                <div class="form-group">
+                    <label  class="form-label" for="">CPF</label>
+
+                    {{ form_user.cpf(class='form-control', value=current_user.cpf, disabled=True)  }}
+                    {% for err in form_user.errors.cpf %}
+                    <span class="text-danger">{{err}}</span>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="row ">
+            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                <a type="button" class="btn btn-outline-secondary btn-sm" href="{{ url_for('auth.change_password') }}">Alterar senha</a>
+            </div>
+        </div>
+
+            <div class="d-grid gap-2 col-6 mx-auto">
+                <button type="submit" class="mt-3 btn btn-dark" >Enviar</button>
+            </div>
+    </form>
+</div>
+
+
+
+{% endblock %}
