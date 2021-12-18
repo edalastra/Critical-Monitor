@@ -1,1 +1,1 @@
-# tcc-critical-monitor
+Critical Monitor is a software related to monitoring and counting people through Computer Vision, that will be  developed as a completion work of the course of Análise e Desenvolvimento de Sistemas, at Instituto Federal de Educação Ciência e Tecnologia do Rio Grande do Sul - Campus Sertão. The System aims to monitor critical situations of SARS-CoV-2 virus contagion, in order to generate alerts about non-compliance with the maximum occupancy limits in indoor environments and social distance.
