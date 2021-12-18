@@ -1,19 +1,21 @@
-
+''' Inference Class '''
+from typing import List
+import cv2
+import imutils
+import math
+import itertools
 from flask import flash
+
 from app.monitor.src.tf_model_object_detection import Model
 from app.models.Occurrence import Occurrence
-from app.models.alchemy_encoder import AlchemyEncoder
-import cv2
 import numpy as np
 from app import socketio, db 
-import datetime;
-import imutils
 from app.monitor.src.bird_view_transfo_functions import compute_perspective_transform,compute_point_perspective_transformation
-import itertools
-import math
 
 class Inference():
-    def __init__(self, config_id, width_og, height_og, size_frame, points, capacity, camera_address, minimum_distance):
+    ''' Deep Learning model inference class '''
+
+    def __init__(self, config_id: int, width_og: int, height_og: int, size_frame: int, points: List[List[int]], capacity: int, camera_address: str, minimum_distance: int):
         self.config_id = config_id
         self.corner_points = points
         self.width_og = width_og
@@ -35,29 +37,27 @@ class Inference():
         self.BIG_CIRCLE = 60
         self.SMALL_CIRCLE = 3
         self.idxs_occ = []
-
-    
-    def register_occurrency(self, type):
+   
+    def __register_occurrency(self, type: str) -> None:
         occurrence = Occurrence(type, self.current_capacity, self.config_id)
         db.session.add(occurrence)
         db.session.commit()
 
-    def triggerAlertDistancing(self, idxs1, idxs2):
+    def triggerAlertDistancing(self, idxs1: int, idxs2: int) -> None:
         if not idxs1 in self.idxs_occ or not idxs2 in self.idxs_occ:
             self.idxs_occ += [idxs1, idxs2]
-            self.register_occurrency('distânciamento')
-        
+            self.__register_occurrency('distânciamento')
 
     def init(self):
 
-        matrix,imgOutput = compute_perspective_transform(self.corner_points,self.width_og,self.height_og, cv2.imread(self.img_path))
-        height,width,_ = imgOutput.shape
+        ''' initalize video frame predictions '''
 
- 
+        matrix, img_output = compute_perspective_transform(self.corner_points,self.width_og,self.height_og, cv2.imread(self.img_path))
+        height, width, _ = img_output.shape
+
         blank_image = np.zeros((height,width,3), np.uint8)
         height = blank_image.shape[0]
         width = blank_image.shape[1] 
-        dim = (width, height)
 
         video_source = None
         try:
@@ -68,21 +68,16 @@ class Inference():
         socketio.emit('alert-distance', {'status': 'success', 'message': 'Nenhuma ocorrência detectada'})
         socketio.emit('alert-capacity', {'status': 'success', 'message': 'Lotação de pessoas não antigiu a capacidade máxima.'})
 
-
-
-        output_video_1,output_video_2 = None,None
         # Loop until the end of the video stream
-        while True:	
+        while True:
             # Load the image of the ground and resize it to the correct size
             bird_view_img = np.zeros((height, width, 3), np.uint8)
 
             #bird_view_img = cv2.resize(blank_image, dim, interpolation = cv2.INTER_AREA)
-
       
             # Load the frame
             (frame_exists, frame) = vs.read()
 
-        
             # Test if it has reached the end of the video
             if not frame_exists:
                 flash('Transmissão encerreda externamente', 'warning')
@@ -95,27 +90,26 @@ class Inference():
 
                 # Get the human detected in the frame and return the 2 points to build the bounding box  
                 array_boxes_detected = self.get_human_box_detection(boxes,scores,classes,frame.shape[0],frame.shape[1])
-                
+    
                 # Both of our lists that will contain the centroïds coordonates and the ground points
-                array_centroids,array_groundpoints = self.get_centroids_and_groundpoints(array_boxes_detected)
+                _array_centroids,array_groundpoints = self.get_centroids_and_groundpoints(array_boxes_detected)
 
                 # Use the transform matrix to get the transformed coordonates
                 transformed_downoids = compute_point_perspective_transformation(matrix,array_groundpoints)
-                
+
                 # Show every point on the top view image 
                 for i, point in enumerate(transformed_downoids):
-                    x,y = point
+                    x, y = point
                     cv2.circle(bird_view_img, (int(x),int(y)), self.BIG_CIRCLE, self.COLOR_GREEN, 2)
                     cv2.circle(bird_view_img, (int(x),int(y)), self.SMALL_CIRCLE, self.COLOR_GREEN, -1)
                     cv2.putText(bird_view_img, str(idxs[i]),((int(x),int(y)-10)),0, 0.75, (255,255,255),2)
-
 
                 # Check if 2 or more people have been detected (otherwise no need to detect)
                 socketio.emit('update_status', {'num_peoples':len(transformed_downoids)})
                 if len(transformed_downoids) > self.capacity:
                     socketio.emit('alert-capacity', {'status': 'danger', 'message': f'Lotação máxima ultrapasada em {len(transformed_downoids) - self.capacity} pessoas!'})
                     if self.current_capacity != len(transformed_downoids):
-                        self.register_occurrency('lotação')
+                        self.__register_occurrency('lotação')
                 else:
                     socketio.emit('alert-capacity', {'status': 'success', 'message': 'Lotação de pessoas não antigiu a capacidade máxima.'})
                 self.current_capacity = len(transformed_downoids)
@@ -126,7 +120,6 @@ class Inference():
                             cv2.rectangle(frame,(array_boxes_detected[index][1],array_boxes_detected[index][0]),(array_boxes_detected[index][3],array_boxes_detected[index][2]),self.COLOR_GREEN,2)
                             cv2.putText(frame, str(idxs[index]),(array_boxes_detected[index][1], array_boxes_detected[index][0]-10),0, 0.75, (255,255,255),2)
 
-                   
                     # Iterate over every possible 2 by 2 between the points combinations 
                     list_indexes = list(itertools.combinations(range(len(transformed_downoids)), 2))
                     for i,pair in enumerate(itertools.combinations(transformed_downoids, r=2)):
@@ -157,13 +150,13 @@ class Inference():
                 added_image = cv2.hconcat([frame, bird_view_img])
                 #added_image = np.concatenate((frame, bird_view_img), axis=1)
 
-                ret, buffer = cv2.imencode('.jpg', added_image)
+                _ret, buffer = cv2.imencode('.jpg', added_image)
                 bframe = buffer.tobytes()
                 yield (b'--frame\r\n'
                     b'Content-Type: image/jpeg\r\n\r\n' + bframe + b'\r\n')
 
-    def get_human_box_detection(self, boxes,scores,classes,height,width):
-        """ 
+    def get_human_box_detection(self, boxes: List) -> List:
+        """
         For each object detected, check if it is a human and if the confidence >> our threshold.
         Return 2 coordonates necessary to build the box.
         @ boxes : all our boxes coordinates
@@ -172,51 +165,22 @@ class Inference():
         @ height : of the image -> to get the real pixel value
         @ width : of the image -> to get the real pixel value
         """
-        # array_boxes = list() # Create an empty list
-        # for i in range(len(scores)):
-           
-        #     #If the class of   the detected object is 1 and the confidence of the prediction is > 0.6
-        #     if classes[i] == 0 and scores[i] > 0.5:
-        #         # To transform the box value into pixel coordonate values.
-        #         #box = [boxes[0,i,0],boxes[0,i,1],boxes[0,i,2],boxes[0,i,3]] * np.array([height, width, height, width])
-        #         # Add the results converted to int
-        #         # ymin = int(max(1,(boxes[i][0] * height)))
-        #         # xmin = int(max(1,(boxes[i][1] * width)))
-        #         # ymax = int(min(height,(boxes[i][2] * height)))
-        #         # xmax = int(min(width,(boxes[i][3] * width)))
-
-        #         ymin = int(max(1,(boxes[i][0] )))
-        #         xmin = int(max(1,(boxes[i][1] )))
-        #         ymax = int(min(height,(boxes[i][2] )))
-        #         xmax = int(min(width,(boxes[i][3])))
-        #         array_boxes.append((int(ymin),int(xmin),int(ymax),int(xmax)))
-        #         #pass
-
-        # for track in tracker.tracks:
-        #     if not track.is_confirmed() or track.time_since_update > 1:
-        #         continue 
-        #     bbox = track.to_tlbr()
-        #     class_name = track.get_class()
-        #     array_boxes.append((int(bbox[0]),int(bbox[1]),int(bbox[2]),int(bbox[3])))
-        #print(tracker.tracks)
         return boxes
 
-
-    def get_centroids_and_groundpoints(self, array_boxes_detected):
+    def get_centroids_and_groundpoints(self, array_boxes_detected: List) -> List:
         """
         For every bounding box, compute the centroid and the point located on the bottom center of the box
         @ array_boxes_detected : list containing all our bounding boxes 
         """
         array_centroids,array_groundpoints = [],[] # Initialize empty centroid and ground point lists 
-        for index,box in enumerate(array_boxes_detected):
+        for box in array_boxes_detected:
             # Draw the bounding box 
             # c
             # Get the both important points
-            centroid,ground_point = self.get_points_from_box(box)
+            centroid, _ = self.get_points_from_box(box)
             array_centroids.append(centroid)
             array_groundpoints.append(centroid)
         return array_centroids,array_groundpoints
-
 
     def get_points_from_box(self, box):
         """
@@ -230,10 +194,9 @@ class Inference():
         # Coordiniate on the point at the bottom center of the box
         center_y_ground = center_y + ((box[2] - box[0])/2)
         return (center_x,center_y),(center_x,int(center_y_ground))
-        
 
     def draw_rectangle(self, frame):
-        # Draw rectangle box over the delimitation area
+        ''' Draw rectangle box over the delimitation area '''
         cv2.line(frame, (self.corner_points[1][0], self.corner_points[1][1]), (self.corner_points[3][0], self.corner_points[3][1]), self.COLOR_BLUE, thickness=1)
         cv2.line(frame, (self.corner_points[3][0], self.corner_points[3][1]), (self.corner_points[2][0], self.corner_points[2][1]), self.COLOR_BLUE, thickness=1)
         cv2.line(frame, (self.corner_points[2][0], self.corner_points[2][1]), (self.corner_points[0][0], self.corner_points[0][1]), self.COLOR_BLUE, thickness=1)
