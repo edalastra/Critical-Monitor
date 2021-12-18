@@ -1,4 +1,5 @@
-''' WTF-Forms for the application '''
+''' Forms for the application '''
+
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, BooleanField
 from wtforms.validators import DataRequired, Email, EqualTo
@@ -29,5 +30,4 @@ class ChangePasswordForm(FlaskForm):
     ''' Form for change password '''
     current_password = PasswordField("current_password", [DataRequired(), check_password])
     new_password = PasswordField("new_password", [DataRequired()])
-    repeat_new_password = PasswordField("repeat_new_password", [EqualTo('new_password', message='As senhas não são iguais')] )
-    
+    repeat_new_password = PasswordField("repeat_new_password", [EqualTo('new_password', message='As senhas não são iguais')] )  

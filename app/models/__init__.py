@@ -1,5 +1,6 @@
-from .Config import Config
-from .User import User
-from .Forms import SigninForm, SignupForm, AlterUserForm, ChangePasswordForm
-from .Inference import Inference
-from .User import User
+from .config import Config
+from .user import User
+from .forms import SigninForm, SignupForm, AlterUserForm, ChangePasswordForm
+from .inference import Inference
+from .user import User
+from .occurrence import Occurrence

@@ -5,9 +5,8 @@ import imutils
 import math
 import itertools
 from flask import flash
-
+from .occurrence import Occurrence
 from app.monitor.src.tf_model_object_detection import Model
-from app.models.Occurrence import Occurrence
 import numpy as np
 from app import socketio, db 
 from app.monitor.src.bird_view_transfo_functions import compute_perspective_transform,compute_point_perspective_transformation
@@ -89,7 +88,7 @@ class Inference():
                 (boxes, scores, classes, idxs) = self.model.model_inference(frame)
 
                 # Get the human detected in the frame and return the 2 points to build the bounding box  
-                array_boxes_detected = self.get_human_box_detection(boxes,scores,classes,frame.shape[0],frame.shape[1])
+                array_boxes_detected = boxes
     
                 # Both of our lists that will contain the centroïds coordonates and the ground points
                 _array_centroids,array_groundpoints = self.get_centroids_and_groundpoints(array_boxes_detected)
@@ -154,18 +153,6 @@ class Inference():
                 bframe = buffer.tobytes()
                 yield (b'--frame\r\n'
                     b'Content-Type: image/jpeg\r\n\r\n' + bframe + b'\r\n')
-
-    def get_human_box_detection(self, boxes: List) -> List:
-        """
-        For each object detected, check if it is a human and if the confidence >> our threshold.
-        Return 2 coordonates necessary to build the box.
-        @ boxes : all our boxes coordinates
-        @ scores : confidence score on how good the prediction is -> between 0 & 1
-        @ classes : the class of the detected object ( 1 for human )
-        @ height : of the image -> to get the real pixel value
-        @ width : of the image -> to get the real pixel value
-        """
-        return boxes
 
     def get_centroids_and_groundpoints(self, array_boxes_detected: List) -> List:
         """
