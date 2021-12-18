@@ -1,5 +1,4 @@
 from flask import request, make_response, jsonify
-import flask
 from app import db, login_manager
 from flask_login import login_user, logout_user, current_user, login_required
 from flask import Blueprint, render_template, flash, redirect, url_for

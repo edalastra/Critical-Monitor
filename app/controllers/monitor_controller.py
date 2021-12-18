@@ -1,10 +1,12 @@
-from app.models.Config import Config
-from flask_login import current_user
-from app import db
+''' monitor controller '''
 import base64
+from flask_login import current_user
 import cv2
+from app import db
+from app.models import Config
 
 def new_config(content):
+    ''' crate a new config '''
     points = content['points']
     camera_address = content['camera_address']
     room_name =content['room_name']
@@ -20,8 +22,9 @@ def new_config(content):
     return config
 
 def get_snapshot(content):
+    ''' open the camera and get a snapshot'''
+
     video_source = None
-    
     try:
         video_source = int(content['address'])
     except ValueError:
@@ -31,9 +34,9 @@ def get_snapshot(content):
     if cap is None or not cap.isOpened():
         raise Exception('Invalid video source')
     _, frame = cap.read()
-    h, w = frame.shape[:2]
-    retval, buffer = cv2.imencode('.jpg', frame)
-    for i in range(2):
+    height, width = frame.shape[:2]
+    _, buffer = cv2.imencode('.jpg', frame)
+    for _i in range(2):
         _, frame = cap.read()
         retval, buffer = cv2.imencode('.jpg', frame)
 
@@ -41,5 +44,5 @@ def get_snapshot(content):
     return {
             "status": "ok",
             "frame": str(jpg_as_text),
-            "h": h,
-            "w": w}
+            "h": height,
+            "w": width}
