@@ -1,7 +1,6 @@
 from flask import Blueprint, flash, Response, redirect, url_for, request, make_response, jsonify
 from app import db
-from flask_login import  current_user
-from app.models.Config import Config
+from app.models import Config
 from app.controllers.monitor_controller import new_config, get_snapshot
 
 

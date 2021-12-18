@@ -1,6 +1,10 @@
+''' SqlAlchemy ORM model for the Config table '''
+from typing import List
 from app import db
 
 class Config(db.Model):
+    ''' Config table '''
+
     id = db.Column(db.Integer, primary_key=True)
     room_name = db.Column(db.String, nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
@@ -19,9 +23,16 @@ class Config(db.Model):
     width_og= db.Column(db.Integer)
     height_og = db.Column(db.Integer)
     occurrences = db.relationship('Occurrence', backref='config', lazy=True, passive_deletes=True)
-    
 
-    def __init__(self, room_name, user_id, minimum_distance, camera_address, points, width_og, height_og, size_frame, capacity):
+    def __init__(self, room_name: str,
+                user_id: int, minimum_distance: int,
+                camera_address: str,
+                points: List,
+                width_og: int,
+                height_og: int,
+                size_frame: int,
+                capacity: int
+                ) -> None:
         self.room_name = room_name
         self.user_id = user_id
         self.minimum_distance = minimum_distance

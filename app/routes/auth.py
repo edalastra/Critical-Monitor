@@ -1,17 +1,15 @@
-from flask import request, make_response, jsonify
-import flask
-from app import db, login_manager
-from flask_login import login_user, logout_user, current_user, login_required
+''' auth routes '''
+from flask_login import  logout_user, current_user, login_required
 from flask import Blueprint, render_template, flash, redirect, url_for
-from app.models.Forms import AlterUserForm, SignupForm, SigninForm, ChangePasswordForm
-from app.models.User import User
+from app.models import AlterUserForm, SignupForm, SigninForm, ChangePasswordForm
 from app.controllers.auth_contoller import register, login, update, change_user_password
+from app import login_manager
 
 auth = Blueprint('auth', __name__) 
 
-
 @auth.route('/signin', methods=['GET', 'POST'])
 def signin():
+    ''' signin page '''
     if current_user.is_authenticated:
         return redirect(url_for('monitor.home'))
     form = SigninForm()
@@ -24,6 +22,7 @@ def signin():
 
 @auth.route('/signup', methods=['GET', 'POST'])
 def signup():
+    ''' signup page '''
     form = SignupForm()
     if form.validate_on_submit():
         register(form)
@@ -34,6 +33,7 @@ def signup():
 @auth.route('/profile/edit', methods=['GET','POST'])
 @login_required
 def edit_profile():
+    ''' edit profile page '''
     form_user = AlterUserForm()
     if form_user.validate_on_submit():
         update(form_user)
@@ -44,6 +44,7 @@ def edit_profile():
 @auth.route('/change_password', methods=['GET', 'POST'])
 @login_required
 def change_password():
+    ''' change password page '''
     form_password = ChangePasswordForm()
     if form_password.validate_on_submit():
         change_user_password(form_password)
@@ -53,14 +54,17 @@ def change_password():
 
 @auth.route('/logout')
 def logout():
+    ''' logout user '''
     logout_user()
     return redirect(url_for('auth.signin')) 
 
 @auth.route('/profile')
 @login_required
 def profile():
+    ''' profile page '''
     return render_template('auth/profile.html')
 
 @login_manager.unauthorized_handler
 def unauthorized_callback():
+    ''' unauthorized callback '''
     return redirect(url_for('auth.signin'))

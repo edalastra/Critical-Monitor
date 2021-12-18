@@ -2,7 +2,7 @@ from sqlalchemy.ext.declarative import DeclarativeMeta
 import json
 
 class AlchemyEncoder(json.JSONEncoder):
-
+    ''' Serialize SQLAlchemy objects to JSON '''
     def default(self, obj):
         if isinstance(obj.__class__, DeclarativeMeta):
             # an SQLAlchemy class
