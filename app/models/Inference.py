@@ -6,10 +6,10 @@ import math
 import itertools
 from flask import flash
 from .occurrence import Occurrence
-from app.monitor.src.tf_model_object_detection import Model
+from app.monitor.tf_model_object_detection import Model
 import numpy as np
 from app import socketio, db 
-from app.monitor.src.bird_view_transfo_functions import compute_perspective_transform,compute_point_perspective_transformation
+from app.monitor.bird_view_transfo_functions import compute_perspective_transform,compute_point_perspective_transformation
 
 class Inference():
     ''' Deep Learning model inference class '''
@@ -20,7 +20,6 @@ class Inference():
         self.width_og = width_og
         self.height_og = height_og
         self.size_frame = size_frame
-        self.img_path = 'app/monitor/img/static_frame_from_video.jpg'
         self.camera_address = camera_address
         #self.model = YoloModel('app/monitor/models/yolov3-tiny.weights')
         self.model = Model('app/monitor/models/yolov4-tiny-416.tflite')
@@ -51,9 +50,10 @@ class Inference():
 
         ''' initalize video frame predictions '''
 
-        matrix, img_output = compute_perspective_transform(self.corner_points,self.width_og,self.height_og, cv2.imread(self.img_path))
-        height, width, _ = img_output.shape
+        blank_image_tp = np.zeros((self.width_og,self.height_og,3), np.uint8)
+        matrix, img_output = compute_perspective_transform(self.corner_points,self.width_og,self.height_og, blank_image_tp)
 
+        height, width, _ = img_output.shape
         blank_image = np.zeros((height,width,3), np.uint8)
         height = blank_image.shape[0]
         width = blank_image.shape[1] 

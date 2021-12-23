@@ -1,0 +1,3 @@
+.env.dev
+pylintrc
+venv
