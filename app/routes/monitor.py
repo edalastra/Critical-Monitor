@@ -35,10 +35,10 @@ def video_feed():
     config_id = request.cookies.get('camera_address')
     config = Config.query.filter(Config.id == int(config_id)).first()
     points = []
-    points.append([config.point_x4, config.point_y4])
-    points.append([config.point_x1, config.point_y1])
-    points.append([config.point_x3, config.point_y3])
+    points.append([config.point_x1, config.point_y2])
     points.append([config.point_x2, config.point_y2])
+    points.append([config.point_x4, config.point_y4])
+    points.append([config.point_x3, config.point_y3])
     inference = Inference(config.id, config.width_og, config.height_og, config.size_frame, points, config.capacity, config.camera_address, config.minimum_distance)
     return Response(inference.init(), mimetype='multipart/x-mixed-replace; boundary=frame')
 

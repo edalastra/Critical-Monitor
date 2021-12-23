@@ -1,5 +1,4 @@
 absl-py==1.0.0
-aio-telegram-bot==1.0.0
 aiohttp==3.5.4
 aiojobs==0.2.2
 alembic==1.7.5
@@ -91,7 +90,6 @@ scipy==1.7.3
 six==1.16.0
 SQLAlchemy==1.4.27
 teleport==0.4.0
-telepot==12.7
 tensorboard==2.7.0
 tensorboard-data-server==0.6.1
 tensorboard-plugin-wit==1.8.0

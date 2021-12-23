@@ -1,5 +1,5 @@
 ''' app config file '''
-from flask import Flask, redirect, url_for
+from flask import Flask, redirect, url_for, flash
 from flask.templating import render_template
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
@@ -7,9 +7,10 @@ from flask_login import LoginManager, current_user
 from flask_socketio import SocketIO
 
 app = Flask(__name__)
-
 app.config.from_object('config')
+
 db = SQLAlchemy(app)
+
 migrate = Migrate(app, db)
 login_manager = LoginManager(app)
 socketio = SocketIO(app)
@@ -35,3 +36,7 @@ def index():
     if current_user.is_authenticated:
         return redirect(url_for('monitor.home'))
     return render_template('index.html')
+
+@app.errorhandler(500)
+def internal_error(error):
+    flash("Ocorreu um erro interno. Por favor, tente novamente mais tarde.", "error")
